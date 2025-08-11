@@ -21,7 +21,7 @@ const credentialsAuthProvider = CredentialsProvider({
         throw new Error('Email and password required');
       }
 
-      const res = await AuthService.verifyOtp(credentials.email, credentials.otp);
+      const res = await AuthService.verifyOtp({ email: credentials.email, otp: credentials.otp });
 
       if (res.data) {
         return {

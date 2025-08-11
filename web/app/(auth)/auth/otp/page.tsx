@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AuthService } from '@/services/auth.service';
 import { useAuthStore } from '@/store';
-import { otpSchema, verifyOtpSchema, OtpFormData, VerifyOtpFormData } from '@/validations';
+import { otpSchema, verifyOtpSchema, VerifyOtpFormData } from '@/validations';
 import { UserRole } from '@/types/auth.type';
 
 export default function OtpLoginPage() {
