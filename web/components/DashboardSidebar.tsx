@@ -1,29 +1,10 @@
 'use client';
-
+import { adminRoutes, ownerRoutes, userRoutes } from '@/config/dashboard-sidebar';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import {
-  Calendar,
-  ChevronLeft,
-  Home,
-  LogOut,
-  Menu,
-  Plus,
-  Settings,
-  Users,
-  Building2,
-  BarChart3,
-  Heart,
-  Search,
-  Clock,
-  Star,
-  Trophy,
-  UserCheck,
-  Shield,
-  BookOpen,
-} from 'lucide-react';
+import { ChevronLeft, LogOut, Menu, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -50,119 +31,13 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
 
   // Define navigation items based on user role
   const getNavigationItems = (): SidebarItem[] => {
-    const baseItems = [
-      {
-        icon: Home,
-        label: 'Dashboard',
-        href: `/${userRole?.toLowerCase()}/dashboard`,
-      },
-    ];
-
-    switch (userRole) {
-      case 'USER':
-        return [
-          ...baseItems,
-          {
-            icon: Search,
-            label: 'Find Facilities',
-            href: '/user/facilities',
-          },
-          {
-            icon: Calendar,
-            label: 'My Bookings',
-            href: '/user/bookings',
-          },
-          {
-            icon: Heart,
-            label: 'Favorites',
-            href: '/user/favorites',
-          },
-          {
-            icon: Trophy,
-            label: 'Find Players',
-            href: '/user/players',
-          },
-          {
-            icon: Clock,
-            label: 'History',
-            href: '/user/history',
-          },
-          {
-            icon: Star,
-            label: 'Reviews',
-            href: '/user/reviews',
-          },
-        ];
-
-      case 'OWNER':
-        return [
-          ...baseItems,
-          {
-            icon: Building2,
-            label: 'My Facilities',
-            href: '/owner/facilities',
-          },
-          {
-            icon: Plus,
-            label: 'Add Facility',
-            href: '/owner/facilities/new',
-          },
-          {
-            icon: Calendar,
-            label: 'Bookings',
-            href: '/owner/bookings',
-          },
-          {
-            icon: BarChart3,
-            label: 'Analytics',
-            href: '/owner/analytics',
-          },
-          {
-            icon: Users,
-            label: 'Customers',
-            href: '/owner/customers',
-          },
-        ];
-
-      case 'ADMIN':
-        return [
-          ...baseItems,
-          {
-            icon: Users,
-            label: 'User Management',
-            href: '/admin/users',
-          },
-          {
-            icon: Building2,
-            label: 'Facilities',
-            href: '/admin/facilities',
-          },
-          {
-            icon: UserCheck,
-            label: 'Verifications',
-            href: '/admin/verifications',
-            badge: '3',
-          },
-          {
-            icon: BarChart3,
-            label: 'Analytics',
-            href: '/admin/analytics',
-          },
-          {
-            icon: BookOpen,
-            label: 'Reports',
-            href: '/admin/reports',
-          },
-          {
-            icon: Shield,
-            label: 'Security',
-            href: '/admin/security',
-          },
-        ];
-
-      default:
-        return baseItems;
-    }
+    const role = userRole ?? 'USER';
+    const routes = role === 'ADMIN' ? adminRoutes : role === 'OWNER' ? ownerRoutes : userRoutes;
+    return routes.map((r) => ({
+      icon: r.icon as SidebarItem['icon'],
+      label: r.title,
+      href: r.link,
+    }));
   };
 
   const navigationItems = getNavigationItems();
