@@ -43,10 +43,21 @@ export default function AuthGuard({ children, requiredRole, requireAuth = true }
         return;
       }
 
-      if (!allowedRoles.includes(userRole)) {
-        router.push('/unauthorized');
-        return;
+      if (userRole === UserRole.OWNER) {
+        const ownerAllowedRoles = [UserRole.OWNER, UserRole.USER];
+        if (allowedRoles.some((role) => ownerAllowedRoles.includes(role))) {
+          return;
+        }
       }
+
+      if (userRole === UserRole.USER) {
+        if (allowedRoles.includes(UserRole.USER)) {
+          return;
+        }
+      }
+
+      router.push('/unauthorized');
+      return;
     }
   }, [isLoading, isAuthenticated, user, requiredRole, requireAuth, router]);
 

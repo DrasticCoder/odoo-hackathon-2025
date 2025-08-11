@@ -38,6 +38,17 @@ export class ApiClient {
         },
       });
 
+      // Debug logging for facilities API calls
+      if (config.url?.includes('/api/facilities')) {
+        console.log('API Request to facilities:', {
+          url: config.url,
+          method: config.method,
+          params: config.params,
+          headers: client.defaults.headers,
+          hasToken: !!token,
+        });
+      }
+
       const response: AxiosResponse<T> = await client.request(config);
       return { data: response.data };
     } catch (err) {
@@ -73,8 +84,8 @@ export class ApiClient {
     }
   }
 
-  static async get<T>(url: string, params?: Record<string, unknown>): Promise<ApiResult<T>> {
-    return this.request<T>({ method: 'GET', url, params });
+  static async get<T>(url: string, config?: { params?: Record<string, unknown> }): Promise<ApiResult<T>> {
+    return this.request<T>({ method: 'GET', url, ...config });
   }
 
   static async post<T, D = unknown>(url: string, data?: D): Promise<ApiResult<T>> {

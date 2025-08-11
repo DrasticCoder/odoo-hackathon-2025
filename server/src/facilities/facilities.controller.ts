@@ -33,7 +33,7 @@ export class FacilitiesController {
   }
 
   @Get()
-  @Public()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all facilities with search and filtering' })
   @ApiResponse({
     status: 200,
@@ -41,6 +41,7 @@ export class FacilitiesController {
     type: PaginatedResponseDto<FacilityResponseDto>,
   })
   findAll(@Query() query: FacilityQueryDto, @CurrentUser() currentUser?: User) {
+    console.log('Current user in facilities controller:', currentUser);
     return this.facilitiesService.findAll(query, currentUser);
   }
 

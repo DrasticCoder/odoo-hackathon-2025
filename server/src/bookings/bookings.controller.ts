@@ -97,7 +97,22 @@ export class BookingsController {
   @Post(':id/cancel')
   @Roles(UserRole.USER, UserRole.OWNER, UserRole.ADMIN)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Cancel booking' })
+  @ApiOperation({ summary: 'Cancel booking (POST)' })
+  @ApiResponse({ status: 200, description: 'Booking cancelled successfully', type: BookingResponseDto })
+  @ApiResponse({ status: 400, description: 'Bad request - Cannot cancel this booking' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Cannot cancel this booking' })
+  cancelPost(
+    @Param('id') id: string,
+    @Body() cancelDto: CancelBookingDto,
+    @CurrentUser() currentUser: { id: string; role: string },
+  ) {
+    return this.bookingsService.cancel(id, cancelDto.reason || 'No reason provided', currentUser);
+  }
+
+  @Patch(':id/cancel')
+  @Roles(UserRole.USER, UserRole.OWNER, UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cancel booking (PATCH)' })
   @ApiResponse({ status: 200, description: 'Booking cancelled successfully', type: BookingResponseDto })
   @ApiResponse({ status: 400, description: 'Bad request - Cannot cancel this booking' })
   @ApiResponse({ status: 403, description: 'Forbidden - Cannot cancel this booking' })

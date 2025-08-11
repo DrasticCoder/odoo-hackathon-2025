@@ -35,13 +35,21 @@ export class FacilitiesService {
 
     if (!currentUser || currentUser.role === UserRole.USER) {
       where.status = FacilityStatus.APPROVED;
-    } else if (status) {
-      where.status = status;
     } else if (currentUser.role === UserRole.OWNER) {
       where.ownerId = currentUser.id;
+      if (status) {
+        where.status = status;
+      }
+    } else if (currentUser.role === UserRole.ADMIN) {
+      if (status) {
+        where.status = status;
+      }
     }
 
-    if (ownerId) where.ownerId = ownerId;
+    if (ownerId && currentUser?.role === UserRole.ADMIN) {
+      where.ownerId = ownerId;
+    }
+
     if (ratingMin) where.avgRating = { gte: ratingMin };
 
     if (q) {
@@ -108,7 +116,6 @@ export class FacilitiesService {
     ]);
 
     const enrichedFacilities = await this.enrichFacilities(facilities);
-
     const meta = createPaginationMeta(total, page, limit);
     return { data: enrichedFacilities, meta };
   }
@@ -256,12 +263,11 @@ export class FacilitiesService {
     }
 
     //TODO: soft del
-    const updatedFacility = await this.prisma.facility.update({
+    await this.prisma.facility.delete({
       where: { id },
-      data: { status: FacilityStatus.SUSPENDED },
     });
 
-    return updatedFacility;
+    return { message: 'Facility deleted successfully' };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
