@@ -27,7 +27,7 @@ const Page = () => {
       <div className='flex h-screen flex-col items-center justify-center gap-4'>
         <p className='text-sm font-medium'>Unauthenticated</p>
         <Link href='/auth'>
-          <Button>Sign In</Button>
+          <Button>Sign In Test</Button>
         </Link>
       </div>
     );
