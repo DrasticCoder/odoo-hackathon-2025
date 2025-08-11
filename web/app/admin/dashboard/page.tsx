@@ -56,7 +56,7 @@ export default function AdminDashboard() {
           {/* Header */}
           <div className='flex items-center justify-between'>
             <div>
-              <h1 className='text-3xl font-bold text-gray-900'>Welcome back, {user?.name}! 🛡️</h1>
+              <h1 className='text-3xl font-bold text-gray-300'>Welcome back, {user?.name}! 🛡️</h1>
               <p className='mt-1 text-gray-600'>Manage your QuickCourt platform and monitor system health</p>
               <div className='mt-2 flex items-center gap-2'>
                 <Badge className='bg-purple-100 text-purple-700'>{user?.role}</Badge>
