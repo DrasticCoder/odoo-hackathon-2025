@@ -192,50 +192,36 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
   return (
     <div
       className={cn(
-        'flex h-screen flex-col border-r bg-card transition-all duration-300',
+        'bg-card flex h-screen flex-col border-r transition-all duration-300',
         isCollapsed ? 'w-16' : 'w-64',
         className
       )}
     >
       {/* Header */}
-      <div className="flex h-16 items-center border-b px-4">
+      <div className='flex h-16 items-center border-b px-4'>
         {!isCollapsed && (
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-orange-500 text-white font-bold">
-              Q
-            </div>
-            <span className="font-semibold text-lg">QuickCourt</span>
+          <div className='flex items-center gap-2'>
+            <div className='flex h-8 w-8 items-center justify-center rounded bg-orange-500 font-bold text-white'>Q</div>
+            <span className='text-lg font-semibold'>QuickCourt</span>
           </div>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="ml-auto"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          {isCollapsed ? <Menu className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        <Button variant='ghost' size='icon' className='ml-auto' onClick={() => setIsCollapsed(!isCollapsed)}>
+          {isCollapsed ? <Menu className='h-4 w-4' /> : <ChevronLeft className='h-4 w-4' />}
         </Button>
       </div>
 
       {/* User Info */}
-      <div className="p-4">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
+      <div className='p-4'>
+        <div className='flex items-center gap-3'>
+          <Avatar className='h-10 w-10'>
             <AvatarImage src={session?.user?.avatarUrl || ''} />
-            <AvatarFallback>
-              {session?.user?.name?.charAt(0)?.toUpperCase() || 'U'}
-            </AvatarFallback>
+            <AvatarFallback>{session?.user?.name?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
           </Avatar>
           {!isCollapsed && (
-            <div className="flex-1 overflow-hidden">
-              <p className="truncate text-sm font-medium">
-                {session?.user?.name || 'User'}
-              </p>
-              <div className="flex items-center gap-2">
-                <Badge
-                  variant="secondary"
-                  className={cn('text-xs', getRoleColor(userRole || ''))}
-                >
+            <div className='flex-1 overflow-hidden'>
+              <p className='truncate text-sm font-medium'>{session?.user?.name || 'User'}</p>
+              <div className='flex items-center gap-2'>
+                <Badge variant='secondary' className={cn('text-xs', getRoleColor(userRole || ''))}>
                   {userRole}
                 </Badge>
               </div>
@@ -247,11 +233,11 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
       <Separator />
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-2">
+      <nav className='flex-1 space-y-1 p-2'>
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const isActive = typeof window !== 'undefined' && window.location.pathname === item.href;
-          
+
           return (
             <Button
               key={item.href}
@@ -263,12 +249,12 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
               )}
               onClick={() => handleNavigation(item.href)}
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <Icon className='h-4 w-4 shrink-0' />
               {!isCollapsed && (
                 <>
-                  <span className="truncate">{item.label}</span>
+                  <span className='truncate'>{item.label}</span>
                   {item.badge && (
-                    <Badge variant="destructive" className="ml-auto text-xs">
+                    <Badge variant='destructive' className='ml-auto text-xs'>
                       {item.badge}
                     </Badge>
                   )}
@@ -282,28 +268,25 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
       <Separator />
 
       {/* Footer */}
-      <div className="p-2 space-y-1">
+      <div className='space-y-1 p-2'>
         <Button
-          variant="ghost"
-          className={cn(
-            'w-full justify-start gap-3',
-            isCollapsed ? 'px-2' : 'px-3'
-          )}
+          variant='ghost'
+          className={cn('w-full justify-start gap-3', isCollapsed ? 'px-2' : 'px-3')}
           onClick={() => handleNavigation('/settings')}
         >
-          <Settings className="h-4 w-4 shrink-0" />
+          <Settings className='h-4 w-4 shrink-0' />
           {!isCollapsed && <span>Settings</span>}
         </Button>
-        
+
         <Button
-          variant="ghost"
+          variant='ghost'
           className={cn(
-            'w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50',
+            'w-full justify-start gap-3 text-red-600 hover:bg-red-50 hover:text-red-700',
             isCollapsed ? 'px-2' : 'px-3'
           )}
           onClick={handleSignOut}
         >
-          <LogOut className="h-4 w-4 shrink-0" />
+          <LogOut className='h-4 w-4 shrink-0' />
           {!isCollapsed && <span>Sign Out</span>}
         </Button>
       </div>
