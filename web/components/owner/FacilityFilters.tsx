@@ -77,7 +77,7 @@ export function FacilityFilters({ onFiltersChange, initialFilters = {}, isLoadin
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [localFilters.q, filters, setFilters]);
+  }, [localFilters.q, filters, setFilters, onFiltersChange]);
 
   const handleFilterChange = (key: keyof FacilityQuery, value: string | number | undefined) => {
     const newFilters = { ...filters, [key]: value, page: 1 };

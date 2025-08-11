@@ -381,7 +381,7 @@ export default function CourtsPage() {
                   initialData={selectedCourt}
                   facilities={facilities}
                   onSubmit={(
-                    _: any,
+                    _: string,
                     data: {
                       name?: string;
                       sportType?: string;
