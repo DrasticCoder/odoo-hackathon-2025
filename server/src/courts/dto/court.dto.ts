@@ -21,7 +21,7 @@ export class CreateCourtDto {
   @ApiProperty({ description: 'Operating hours as JSON object', required: false })
   @IsOptional()
   @IsObject()
-  operatingHours?: Record<string, any>;
+  operatingHours?: Record<string, unknown>;
 }
 
 export class UpdateCourtDto {
@@ -50,7 +50,7 @@ export class UpdateCourtDto {
   @ApiProperty({ description: 'Operating hours as JSON object', required: false })
   @IsOptional()
   @IsObject()
-  operatingHours?: Record<string, any>;
+  operatingHours?: Record<string, unknown>;
 }
 
 export class CourtQueryDto extends PaginationQueryDto {
@@ -109,7 +109,7 @@ export class CourtResponseDto {
   isActive: boolean;
 
   @ApiProperty({ description: 'Operating hours' })
-  operatingHours: Record<string, any> | null;
+  operatingHours: Record<string, unknown> | null;
 
   @ApiProperty({ description: 'Creation date' })
   createdAt: Date;

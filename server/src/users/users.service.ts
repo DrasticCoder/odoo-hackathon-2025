@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto, UpdateUserDto, UserQueryDto } from './dto/user.dto';
-import { createPaginationMeta, PaginationOptions } from '../common/dto/pagination.dto';
+import { createPaginationMeta } from '../common/dto/pagination.dto';
 import { UserRole, Prisma, User } from 'prisma/client';
 
 @Injectable()
@@ -88,6 +88,9 @@ export class UsersService {
 
   async update(id: string, updateUserDto: UpdateUserDto, currentUser: Pick<User, 'id' | 'role'>) {
     const user = await this.findOne(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     if (currentUser.id !== id && currentUser.role !== UserRole.ADMIN) {
       throw new ForbiddenException('You can only update your own profile');
@@ -109,6 +112,10 @@ export class UsersService {
 
   async ban(id: string, reason?: string) {
     const user = await this.findOne(id);
+    console.log(reason);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     const updatedUser = await this.prisma.user.update({
       where: { id },
@@ -122,6 +129,9 @@ export class UsersService {
 
   async unban(id: string) {
     const user = await this.findOne(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     const updatedUser = await this.prisma.user.update({
       where: { id },
@@ -135,6 +145,9 @@ export class UsersService {
 
   async remove(id: string) {
     const user = await this.findOne(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     const updatedUser = await this.prisma.user.update({
       where: { id },
       data: { isActive: false },
@@ -145,6 +158,7 @@ export class UsersService {
 
   private sanitizeUser<T extends { passwordHash?: string | null }>(user: T): Omit<T, 'passwordHash'> {
     const { passwordHash, ...sanitized } = user;
+    console.log('Sanitized user:', passwordHash);
     return sanitized;
   }
 

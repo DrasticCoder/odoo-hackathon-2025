@@ -7,8 +7,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/user.decorator';
-import { Public } from '../auth/decorators/public.decorator';
-import { UserRole } from 'prisma/client';
+import { UserRole, User } from 'prisma/client';
 
 @ApiTags('Users')
 @Controller('api/users')
@@ -44,10 +43,10 @@ export class UsersController {
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiResponse({ status: 200, description: 'User found', type: UserResponseDto })
   @ApiResponse({ status: 404, description: 'User not found' })
-  findOne(@Param('id') id: string, @Query('include') include?: string, @CurrentUser() currentUser?: any) {
+  findOne(@Param('id') id: string, @Query('include') include?: string, @CurrentUser() currentUser?: User) {
     const includeStats = include?.includes('stats');
 
-    if (currentUser.id !== id && currentUser.role !== UserRole.ADMIN) {
+    if (!currentUser || (currentUser.id !== id && currentUser.role !== UserRole.ADMIN)) {
       return this.usersService.findOne(id, false);
     }
 
@@ -60,7 +59,7 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'User updated successfully', type: UserResponseDto })
   @ApiResponse({ status: 403, description: 'Forbidden - Can only update own profile' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @CurrentUser() currentUser: any) {
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @CurrentUser() currentUser: User) {
     return this.usersService.update(id, updateUserDto, currentUser);
   }
 

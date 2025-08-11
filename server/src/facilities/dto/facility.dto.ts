@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsEnum, IsNumber, Min, IsObject, IsArray } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber, Min, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
 import { FacilityStatus } from 'prisma/client';
 import { PaginationQueryDto } from '../../common/dto/pagination.dto';

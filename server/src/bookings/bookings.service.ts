@@ -8,7 +8,12 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookingDto, UpdateBookingDto, BookingQueryDto, PaymentDto } from './dto/booking.dto';
 import { createPaginationMeta } from '../common/dto/pagination.dto';
-import { BookingStatus, UserRole } from 'prisma/client';
+import { BookingStatus, UserRole, Prisma } from 'prisma/client';
+
+interface CurrentUser {
+  id: string;
+  role: string;
+}
 
 @Injectable()
 export class BookingsService {
@@ -118,12 +123,12 @@ export class BookingsService {
     });
   }
 
-  async findAll(query: BookingQueryDto, currentUser: any) {
-    const { page = 1, limit = 20, q, sort, status, userId, facilityId, courtId, startDate, endDate, include } = query;
+  async findAll(query: BookingQueryDto, currentUser: CurrentUser) {
+    const { page = 1, limit = 20, q, sort, status, userId, facilityId, courtId, startDate, endDate } = query;
 
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: Prisma.BookingWhereInput = {};
 
     if (currentUser.role === UserRole.USER) {
       where.userId = currentUser.id;
@@ -139,10 +144,12 @@ export class BookingsService {
     if (startDate || endDate) {
       where.AND = where.AND || [];
       if (startDate) {
-        where.AND.push({ startDatetime: { gte: new Date(startDate) } });
+        (where.AND as Array<Prisma.BookingWhereInput>).push({ startDatetime: { gte: new Date(startDate) } });
       }
       if (endDate) {
-        where.AND.push({ endDatetime: { lte: new Date(endDate + 'T23:59:59.999Z') } });
+        (where.AND as Array<Prisma.BookingWhereInput>).push({
+          endDatetime: { lte: new Date(endDate + 'T23:59:59.999Z') },
+        });
       }
     }
 
@@ -154,7 +161,7 @@ export class BookingsService {
       ];
     }
 
-    const includeOptions: any = {
+    const includeOptions = {
       user: {
         select: { id: true, name: true, email: true, avatarUrl: true },
       },
@@ -173,8 +180,8 @@ export class BookingsService {
         where,
         skip,
         take: limit,
-        orderBy: orderBy as any,
         include: includeOptions,
+        orderBy,
       }),
       this.prisma.booking.count({ where }),
     ]);
@@ -183,7 +190,7 @@ export class BookingsService {
     return { data: bookings, meta };
   }
 
-  async findOne(id: string, currentUser: any) {
+  async findOne(id: string, currentUser: CurrentUser) {
     const booking = await this.prisma.booking.findUnique({
       where: { id },
       include: {
@@ -214,7 +221,7 @@ export class BookingsService {
     return booking;
   }
 
-  async update(id: string, updateBookingDto: UpdateBookingDto, currentUser: any) {
+  async update(id: string, updateBookingDto: UpdateBookingDto, currentUser: CurrentUser) {
     const booking = await this.findOne(id, currentUser);
 
     if (booking.status !== BookingStatus.PENDING) {
@@ -244,7 +251,7 @@ export class BookingsService {
     return updatedBooking;
   }
 
-  async pay(id: string, paymentDto: PaymentDto, currentUser: any) {
+  async pay(id: string, paymentDto: PaymentDto, currentUser: CurrentUser) {
     const booking = await this.findOne(id, currentUser);
 
     if (booking.status !== BookingStatus.PENDING) {
@@ -283,7 +290,7 @@ export class BookingsService {
     return updatedBooking;
   }
 
-  async cancel(id: string, reason: string, currentUser: any) {
+  async cancel(id: string, reason: string, currentUser: CurrentUser) {
     const booking = await this.findOne(id, currentUser);
 
     if (booking.status === BookingStatus.CANCELLED) {
@@ -323,8 +330,8 @@ export class BookingsService {
     return updatedBooking;
   }
 
-  async getStats(currentUser: any, facilityId?: string) {
-    const where: any = {};
+  async getStats(currentUser: CurrentUser, facilityId?: string) {
+    const where: Prisma.BookingWhereInput = {};
 
     if (currentUser.role === UserRole.USER) {
       where.userId = currentUser.id;
@@ -359,13 +366,14 @@ export class BookingsService {
   // TODO: add payment processing- satharva
   private async simulatePayment(paymentMethod: string, amount: number): Promise<boolean> {
     await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log(`Simulating payment of ${amount} using ${paymentMethod}`);
     return Math.random() > 0.05;
   }
 
   private buildOrderBy(sort?: string) {
-    if (!sort) return { createdAt: 'desc' };
+    if (!sort) return { createdAt: 'desc' as const };
 
     const [field, direction = 'asc'] = sort.split(',');
-    return { [field]: direction };
+    return { [field]: direction as 'asc' | 'desc' };
   }
 }

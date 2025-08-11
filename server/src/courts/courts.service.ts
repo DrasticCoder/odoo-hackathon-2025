@@ -10,11 +10,16 @@ import {
 import { createPaginationMeta } from '../common/dto/pagination.dto';
 import { UserRole, Prisma } from 'prisma/client';
 
+interface CurrentUser {
+  id: string;
+  role: string;
+}
+
 @Injectable()
 export class CourtsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(facilityId: string, createCourtDto: CreateCourtDto, currentUser: any) {
+  async create(facilityId: string, createCourtDto: CreateCourtDto, currentUser: CurrentUser) {
     const facility = await this.prisma.facility.findUnique({
       where: { id: facilityId },
     });
@@ -31,6 +36,7 @@ export class CourtsService {
       data: {
         ...createCourtDto,
         facilityId,
+        operatingHours: createCourtDto.operatingHours as Prisma.InputJsonValue,
       },
       include: {
         facility: {
@@ -160,7 +166,7 @@ export class CourtsService {
     return court;
   }
 
-  async update(id: string, updateCourtDto: UpdateCourtDto, currentUser: any) {
+  async update(id: string, updateCourtDto: UpdateCourtDto, currentUser: CurrentUser) {
     const court = await this.prisma.court.findUnique({
       where: { id },
       include: {
@@ -180,7 +186,10 @@ export class CourtsService {
 
     const updatedCourt = await this.prisma.court.update({
       where: { id },
-      data: updateCourtDto,
+      data: {
+        ...updateCourtDto,
+        operatingHours: updateCourtDto.operatingHours as Prisma.InputJsonValue,
+      },
       include: {
         facility: {
           select: { id: true, name: true, shortLocation: true, ownerId: true },
@@ -191,7 +200,7 @@ export class CourtsService {
     return updatedCourt;
   }
 
-  async remove(id: string, currentUser: any) {
+  async remove(id: string, currentUser: CurrentUser) {
     const court = await this.prisma.court.findUnique({
       where: { id },
       include: {
@@ -261,7 +270,7 @@ export class CourtsService {
     return slots;
   }
 
-  async createAvailabilitySlot(courtId: string, createSlotDto: CreateAvailabilitySlotDto, currentUser: any) {
+  async createAvailabilitySlot(courtId: string, createSlotDto: CreateAvailabilitySlotDto, currentUser: CurrentUser) {
     const court = await this.prisma.court.findUnique({
       where: { id: courtId },
       include: {
@@ -310,7 +319,11 @@ export class CourtsService {
     return slot;
   }
 
-  async updateAvailabilitySlot(slotId: string, updateData: Partial<CreateAvailabilitySlotDto>, currentUser: any) {
+  async updateAvailabilitySlot(
+    slotId: string,
+    updateData: Partial<CreateAvailabilitySlotDto>,
+    currentUser: CurrentUser,
+  ) {
     const slot = await this.prisma.availabilitySlot.findUnique({
       where: { id: slotId },
       include: {
@@ -339,7 +352,7 @@ export class CourtsService {
     return updatedSlot;
   }
 
-  async deleteAvailabilitySlot(slotId: string, currentUser: any) {
+  async deleteAvailabilitySlot(slotId: string, currentUser: CurrentUser) {
     const slot = await this.prisma.availabilitySlot.findUnique({
       where: { id: slotId },
       include: {
