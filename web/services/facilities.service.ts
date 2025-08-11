@@ -18,7 +18,7 @@ export type UpdateFacilityPayload = Partial<Pick<Facility, 'name' | 'description
 export class FacilitiesService {
   static async listMine() {
     // server returns only owner's facilities for owner; admin will get all when needed
-    return await ApiClient.get<{ data: Facility[] }>(`/api/facilities`, { include: 'counts' });
+    return await ApiClient.get<{ data: Facility[] }>(`/api/facilities`, { params: { include: 'counts' } });
   }
 
   static async remove(id: string) {
