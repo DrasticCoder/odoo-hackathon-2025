@@ -1,5 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto, UserQueryDto, UserResponseDto, BanUserDto } from './dto/user.dto';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
@@ -14,6 +27,62 @@ import { UserRole, User } from 'prisma/client';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  // Current User Profile Endpoints
+  @Get('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'User profile retrieved successfully', type: UserResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  getCurrentUser(@CurrentUser() currentUser: User) {
+    return this.usersService.findOne(currentUser.id, true);
+  }
+
+  @Patch('me')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiResponse({ status: 200, description: 'User profile updated successfully', type: UserResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  updateCurrentUser(@Body() updateUserDto: UpdateUserDto, @CurrentUser() currentUser: User) {
+    return this.usersService.update(currentUser.id, updateUserDto, currentUser);
+  }
+
+  @Post('me/avatar')
+  @UseInterceptors(FileInterceptor('avatar'))
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload user avatar' })
+  @ApiResponse({ status: 200, description: 'Avatar uploaded successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async uploadAvatar(@UploadedFile() file: Express.Multer.File, @CurrentUser() currentUser: User) {
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+    return this.usersService.uploadAvatar(currentUser.id, file);
+  }
+
+  @Get('me/bookings')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user bookings' })
+  @ApiResponse({ status: 200, description: 'User bookings retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  getMyBookings(
+    @Query()
+    query: { page?: number; limit?: number; status?: string; dateFrom?: string; dateTo?: string; sort?: string },
+    @CurrentUser() currentUser: User,
+  ) {
+    return this.usersService.getUserBookings(currentUser.id, query);
+  }
+
+  @Get('me/bookings/:bookingId')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get specific user booking' })
+  @ApiResponse({ status: 200, description: 'Booking retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Booking not found' })
+  getMyBooking(@Param('bookingId') bookingId: string, @CurrentUser() currentUser: User) {
+    return this.usersService.getUserBooking(currentUser.id, bookingId);
+  }
 
   @Post()
   @Roles(UserRole.ADMIN)

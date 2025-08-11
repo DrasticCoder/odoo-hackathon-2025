@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto, UpdateUserDto, UserQueryDto } from './dto/user.dto';
 import { createPaginationMeta } from '../common/dto/pagination.dto';
-import { UserRole, Prisma, User } from 'prisma/client';
+import { UserRole, Prisma, User, BookingStatus } from 'prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -154,6 +154,86 @@ export class UsersService {
     });
 
     return this.sanitizeUser(updatedUser);
+  }
+
+  async uploadAvatar(userId: string, file: Express.Multer.File) {
+    const avatarUrl = `https://example.com/avatars/${userId}-${Date.now()}.${file.mimetype.split('/')[1]}`;
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl },
+    });
+
+    return {
+      url: avatarUrl,
+      user: this.sanitizeUser(updatedUser),
+    };
+  }
+
+  async getUserBookings(
+    userId: string,
+    query: { page?: number; limit?: number; status?: string; dateFrom?: string; dateTo?: string; sort?: string },
+  ) {
+    const { page = 1, limit = 20, status, dateFrom, dateTo, sort = 'createdAt,desc' } = query;
+    const skip = (page - 1) * limit;
+
+    const where: { userId: string; status?: BookingStatus; startDatetime?: { gte?: Date; lte?: Date } } = { userId };
+
+    if (status) {
+      where.status = status as BookingStatus;
+    }
+
+    if (dateFrom || dateTo) {
+      where.startDatetime = {};
+      if (dateFrom) where.startDatetime.gte = new Date(dateFrom);
+      if (dateTo) where.startDatetime.lte = new Date(dateTo);
+    }
+
+    const orderBy = this.buildOrderBy(sort);
+
+    const [bookings, total] = await Promise.all([
+      this.prisma.booking.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+        include: {
+          court: {
+            select: { id: true, name: true, sportType: true },
+          },
+          facility: {
+            select: { id: true, name: true, shortLocation: true },
+          },
+        },
+      }),
+      this.prisma.booking.count({ where }),
+    ]);
+
+    const meta = createPaginationMeta(total, page, limit);
+    return { data: bookings, meta };
+  }
+
+  async getUserBooking(userId: string, bookingId: string) {
+    const booking = await this.prisma.booking.findFirst({
+      where: {
+        id: bookingId,
+        userId,
+      },
+      include: {
+        court: {
+          select: { id: true, name: true, sportType: true },
+        },
+        facility: {
+          select: { id: true, name: true, shortLocation: true, address: true },
+        },
+      },
+    });
+
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    return booking;
   }
 
   private sanitizeUser<T extends { passwordHash?: string | null }>(user: T): Omit<T, 'passwordHash'> {

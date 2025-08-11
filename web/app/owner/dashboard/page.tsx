@@ -1,53 +1,130 @@
 'use client';
 
-import { useAuthStore } from '@/store';
-import AuthGuard from '@/components/auth/AuthGuard';
-import { UserRole } from '@/types/auth.type';
-import { DashboardLayout } from '@/components/DashboardLayout';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, Calendar, DollarSign, Users, Plus, BarChart3, Eye, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Calendar, TrendingUp, TrendingDown, Users, Building2, DollarSign, BarChart3, Link, Plus } from 'lucide-react';
+import AuthGuard from '@/components/auth/AuthGuard';
+import { OwnerLayout } from '@/components/OwnerLayout';
+import { OwnerService } from '@/services/owner.service';
+import { OwnerDashboardStats, UpcomingBooking, RecentActivity, BookingTrend } from '@/types/owner.types';
+import { UserRole } from '@/types/auth.type';
+import { toast } from 'sonner';
+import { DashboardLayout } from '@/components/DashboardLayout';
+import { useAuthStore } from '@/store';
 
-export default function OwnerDashboard() {
+export default function OwnerDashboardPage() {
+  const [stats, setStats] = useState<OwnerDashboardStats | null>(null);
+  const [upcomingBookings, setUpcomingBookings] = useState<UpcomingBooking[]>([]);
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([]);
+  const [bookingTrends, setBookingTrends] = useState<BookingTrend[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+
   const { user } = useAuthStore();
 
-  const statsCards = [
-    {
-      title: 'My Facilities',
-      value: '3',
-      description: '2 active, 1 pending approval',
-      icon: Building2,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
-    },
-    {
-      title: 'Total Bookings',
-      value: '127',
-      description: '+15.2% from last month',
-      icon: Calendar,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
-    },
-    {
-      title: 'Monthly Revenue',
-      value: '₹12,450',
-      description: '+8.1% from last month',
-      icon: DollarSign,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
-    },
-    {
-      title: 'Active Courts',
-      value: '8',
-      description: 'Across all facilities',
-      icon: Users,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
-    },
-  ];
+  const loadDashboardData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [statsResponse, upcomingResponse, activityResponse, trendsResponse] = await Promise.all([
+        OwnerService.getDashboardStats(),
+        OwnerService.getUpcomingBookings(10),
+        OwnerService.getRecentActivity(20),
+        OwnerService.getBookingTrends({ period: selectedPeriod }),
+      ]);
+
+      if (statsResponse.data) setStats(statsResponse.data);
+      if (upcomingResponse.data) setUpcomingBookings(upcomingResponse.data);
+      if (activityResponse.data) setRecentActivity(activityResponse.data);
+      if (trendsResponse.data) setBookingTrends(trendsResponse.data);
+    } catch (error) {
+      toast.error('Failed to load dashboard data');
+      console.error('Dashboard error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedPeriod]);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  const formatTimeUntil = (minutes: number) => {
+    if (minutes < 60) return `${minutes}m`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}h ${remainingMinutes}m`;
+  };
+
+  const getGrowthIcon = (percentage: number) => {
+    if (percentage > 0) return <TrendingUp className='text-primary h-4 w-4' />;
+    if (percentage < 0) return <TrendingDown className='text-destructive h-4 w-4' />;
+    return null;
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'confirmed':
+        return 'default';
+      case 'pending':
+        return 'secondary';
+      case 'cancelled':
+        return 'destructive';
+      case 'completed':
+        return 'outline';
+      default:
+        return 'outline';
+    }
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'booking_created':
+        return '📅';
+      case 'booking_cancelled':
+        return '❌';
+      case 'facility_updated':
+        return '🏢';
+      case 'court_added':
+        return '🎾';
+      default:
+        return '📝';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <AuthGuard requiredRole={[UserRole.OWNER]}>
+        <OwnerLayout>
+          <div className='container mx-auto p-6'>
+            <div className='mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
+              {[...Array(4)].map((_, i) => (
+                <Card key={i}>
+                  <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                    <div className='bg-muted h-4 w-20 animate-pulse rounded'></div>
+                    <div className='bg-muted h-4 w-4 animate-pulse rounded'></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className='bg-muted mb-2 h-8 w-16 animate-pulse rounded'></div>
+                    <div className='bg-muted h-3 w-24 animate-pulse rounded'></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </OwnerLayout>
+      </AuthGuard>
+    );
+  }
 
   return (
     <AuthGuard requiredRole={UserRole.OWNER}>
@@ -60,7 +137,7 @@ export default function OwnerDashboard() {
               <p className='mt-1 text-gray-400'>Manage your sports facilities and grow your business</p>
             </div>
             <div className='flex gap-3'>
-              <Button asChild className='bg-orange-500 hover:bg-orange-600'>
+              <Button asChild className='bg-primary hover:bg-sidebar-primary'>
                 <Link href='/owner/facilities/add'>
                   <Plus className='mr-2 h-4 w-4' />
                   Add Facility
@@ -75,131 +152,208 @@ export default function OwnerDashboard() {
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            {statsCards.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <motion.div
-                  key={stat.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card>
-                    <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                      <CardTitle className='text-sm font-medium'>{stat.title}</CardTitle>
-                      <div className={`rounded-full p-2 ${stat.bgColor}`}>
-                        <Icon className={`h-4 w-4 ${stat.color}`} />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className='text-2xl font-bold'>{stat.value}</div>
-                      <p className='mt-1 text-xs text-gray-600'>{stat.description}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          <div className='grid gap-6 md:grid-cols-2'>
-            {/* Quick Actions */}
+          {/* KPI Cards */}
+          <div className='mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
             <Card>
-              <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>Manage your facilities and bookings</CardDescription>
-              </CardHeader>
-              <CardContent className='space-y-4'>
-                <Button asChild className='w-full bg-orange-500 hover:bg-orange-600'>
-                  <Link href='/owner/facilities/add'>
-                    <Plus className='mr-2 h-4 w-4' />
-                    Add New Facility
-                  </Link>
-                </Button>
-                <Button asChild variant='outline' className='w-full'>
-                  <Link href='/owner/facilities'>
-                    <Building2 className='mr-2 h-4 w-4' />
-                    Manage Facilities
-                  </Link>
-                </Button>
-                <Button asChild variant='outline' className='w-full'>
-                  <Link href='/owner/bookings'>
-                    <Eye className='mr-2 h-4 w-4' />
-                    View Bookings
-                  </Link>
-                </Button>
-                <Button asChild variant='outline' className='w-full'>
-                  <Link href='/owner/analytics'>
-                    <TrendingUp className='mr-2 h-4 w-4' />
-                    Analytics Dashboard
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Recent Bookings */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Bookings</CardTitle>
-                <CardDescription>Latest bookings at your facilities</CardDescription>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>Total Bookings</CardTitle>
+                <Calendar className='text-muted-foreground h-4 w-4' />
               </CardHeader>
               <CardContent>
-                <div className='space-y-4'>
-                  <div className='flex items-center justify-between rounded-lg border p-3'>
-                    <div className='flex-1'>
-                      <p className='text-sm font-medium'>SportZone Arena - Court 1</p>
-                      <p className='text-xs text-gray-600'>Badminton • Today 6:00 PM</p>
-                      <Badge className='mt-1 bg-green-100 text-green-700'>Confirmed</Badge>
-                    </div>
-                    <span className='text-sm font-medium text-green-600'>₹500</span>
-                  </div>
-                  <div className='flex items-center justify-between rounded-lg border p-3'>
-                    <div className='flex-1'>
-                      <p className='text-sm font-medium'>City Sports - Court 2</p>
-                      <p className='text-xs text-gray-600'>Tennis • Tomorrow 8:00 AM</p>
-                      <Badge className='mt-1 bg-blue-100 text-blue-700'>Upcoming</Badge>
-                    </div>
-                    <span className='text-sm font-medium text-green-600'>₹800</span>
-                  </div>
-                  <div className='flex items-center justify-between rounded-lg border p-3'>
-                    <div className='flex-1'>
-                      <p className='text-sm font-medium'>Elite Club - Court 3</p>
-                      <p className='text-xs text-gray-600'>Basketball • Dec 25 4:00 PM</p>
-                      <Badge className='mt-1 bg-orange-100 text-orange-700'>Pending</Badge>
-                    </div>
-                    <span className='text-sm font-medium text-green-600'>₹1200</span>
-                  </div>
+                <div className='text-2xl font-bold'>{stats?.totalBookings || 0}</div>
+                <p className='text-muted-foreground text-xs'>
+                  {stats?.confirmedBookings || 0} confirmed, {stats?.pendingBookings || 0} pending
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>Active Courts</CardTitle>
+                <Building2 className='text-muted-foreground h-4 w-4' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>{stats?.activeCourts || 0}</div>
+                <p className='text-muted-foreground text-xs'>Across {stats?.totalFacilities || 0} facilities</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>Total Earnings</CardTitle>
+                <DollarSign className='text-muted-foreground h-4 w-4' />
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>{formatCurrency(stats?.totalEarnings || 0)}</div>
+                <p className='text-muted-foreground text-xs'>
+                  Avg: {formatCurrency(stats?.averageBookingValue || 0)} per booking
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                <CardTitle className='text-sm font-medium'>Monthly Growth</CardTitle>
+                {getGrowthIcon(stats?.growthPercentage || 0)}
+              </CardHeader>
+              <CardContent>
+                <div className='text-2xl font-bold'>
+                  {stats?.growthPercentage ? `${stats.growthPercentage.toFixed(1)}%` : '0%'}
                 </div>
-                <Button asChild variant='outline' className='mt-4 w-full'>
-                  <Link href='/owner/bookings'>View All Bookings</Link>
-                </Button>
+                <p className='text-muted-foreground text-xs'>
+                  This month: {formatCurrency(stats?.thisMonthEarnings || 0)}
+                </p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Performance Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <TrendingUp className='h-5 w-5' />
-                Booking Trends
-              </CardTitle>
-              <CardDescription>Your facility booking performance over time</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='flex h-64 items-center justify-center rounded-lg border-2 border-dashed border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100'>
-                <div className='text-center'>
-                  <BarChart3 className='mx-auto mb-4 h-12 w-12 text-orange-400' />
-                  <p className='font-medium text-gray-600'>Analytics Chart Coming Soon</p>
-                  <p className='mt-1 text-sm text-gray-500'>Detailed booking trends and revenue analytics</p>
-                  <Button asChild variant='outline' className='mt-4'>
-                    <Link href='/owner/analytics'>View Full Analytics</Link>
-                  </Button>
-                </div>
+          {/* Main Content Tabs */}
+          <Tabs defaultValue='overview' className='space-y-6'>
+            <TabsList>
+              <TabsTrigger value='overview'>Overview</TabsTrigger>
+              <TabsTrigger value='bookings'>Bookings</TabsTrigger>
+              <TabsTrigger value='analytics'>Analytics</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value='overview' className='space-y-6'>
+              <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+                {/* Upcoming Bookings */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Upcoming Bookings</CardTitle>
+                    <CardDescription>Next bookings at your facilities</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className='space-y-4'>
+                      {upcomingBookings.slice(0, 5).map((booking) => (
+                        <div key={booking.id} className='flex items-center justify-between rounded-lg border p-3'>
+                          <div className='flex-1'>
+                            <div className='font-medium'>{booking.userName}</div>
+                            <div className='text-muted-foreground text-sm'>
+                              {booking.facilityName} - {booking.courtName}
+                            </div>
+                            <div className='text-muted-foreground text-xs'>
+                              {new Date(booking.startDatetime).toLocaleString()}
+                            </div>
+                          </div>
+                          <div className='text-right'>
+                            <Badge variant={getStatusColor(booking.status)}>{booking.status}</Badge>
+                            <div className='text-muted-foreground mt-1 text-xs'>
+                              in {formatTimeUntil(booking.timeUntilBooking)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {upcomingBookings.length === 0 && (
+                        <p className='text-muted-foreground py-4 text-center'>No upcoming bookings</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Activity */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                    <CardDescription>Latest updates from your facilities</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className='space-y-4'>
+                      {recentActivity.slice(0, 5).map((activity) => (
+                        <div key={activity.id} className='flex items-start gap-3'>
+                          <div className='text-lg'>{getActivityIcon(activity.type)}</div>
+                          <div className='flex-1'>
+                            <div className='text-sm'>{activity.description}</div>
+                            {activity.userName && (
+                              <div className='text-muted-foreground text-xs'>by {activity.userName}</div>
+                            )}
+                            <div className='text-muted-foreground text-xs'>
+                              {new Date(activity.timestamp).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      {recentActivity.length === 0 && (
+                        <p className='text-muted-foreground py-4 text-center'>No recent activity</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </CardContent>
-          </Card>
+            </TabsContent>
+
+            <TabsContent value='bookings' className='space-y-6'>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Booking Overview</CardTitle>
+                  <CardDescription>Manage your facility bookings</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className='py-8 text-center'>
+                    <Users className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
+                    <h3 className='mb-2 text-lg font-medium'>Booking Management</h3>
+                    <p className='text-muted-foreground mb-4'>View and manage all bookings across your facilities</p>
+                    <Button>View All Bookings</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value='analytics' className='space-y-6'>
+              <Card>
+                <CardHeader className='flex flex-row items-center justify-between'>
+                  <div>
+                    <CardTitle>Booking Trends</CardTitle>
+                    <CardDescription>Track your booking performance over time</CardDescription>
+                  </div>
+                  <div className='flex gap-2'>
+                    <Button
+                      variant={selectedPeriod === 'daily' ? 'default' : 'outline'}
+                      size='sm'
+                      onClick={() => setSelectedPeriod('daily')}
+                    >
+                      Daily
+                    </Button>
+                    <Button
+                      variant={selectedPeriod === 'weekly' ? 'default' : 'outline'}
+                      size='sm'
+                      onClick={() => setSelectedPeriod('weekly')}
+                    >
+                      Weekly
+                    </Button>
+                    <Button
+                      variant={selectedPeriod === 'monthly' ? 'default' : 'outline'}
+                      size='sm'
+                      onClick={() => setSelectedPeriod('monthly')}
+                    >
+                      Monthly
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className='space-y-4'>
+                    {bookingTrends.map((trend, index) => (
+                      <div key={index} className='flex items-center justify-between rounded-lg border p-3'>
+                        <div>
+                          <div className='font-medium'>{trend.period}</div>
+                          <div className='text-muted-foreground text-sm'>{trend.bookings} bookings</div>
+                        </div>
+                        <div className='text-right'>
+                          <div className='font-medium'>{formatCurrency(trend.earnings)}</div>
+                          <div className='text-muted-foreground text-sm'>
+                            {formatCurrency(trend.bookings > 0 ? trend.earnings / trend.bookings : 0)} avg
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {bookingTrends.length === 0 && (
+                      <p className='text-muted-foreground py-4 text-center'>No booking trends data</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </DashboardLayout>
     </AuthGuard>

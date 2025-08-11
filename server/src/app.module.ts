@@ -8,6 +8,10 @@ import { AuthModule } from './auth/auth.module';
 import { FacilitiesModule } from './facilities/facilities.module';
 import { UsersModule } from './users/users.module';
 import { BookingsModule } from './bookings/bookings.module';
+import { CourtsModule } from './courts/courts.module';
+import { PhotosModule } from './photos/photos.module';
+import { OwnerDashboardModule } from './owner/owner-dashboard.module';
+import { HomeModule } from './home/home.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { MailModule } from './mail/mail.module';
 import { LLMModule } from './llm/llm.module';
@@ -60,6 +64,10 @@ import { config } from './common/config';
     FacilitiesModule,
     UsersModule,
     BookingsModule,
+    CourtsModule,
+    PhotosModule,
+    OwnerDashboardModule,
+    HomeModule,
     MailModule,
     LLMModule,
   ],
