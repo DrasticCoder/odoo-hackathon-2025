@@ -1,6 +1,6 @@
-// create interface with title , link,icon 
+// create interface with title , link,icon
 
-import { SettingsIcon,  Home,UsersIcon } from "lucide-react";
+import { SettingsIcon, Home, UsersIcon } from 'lucide-react';
 
 interface AdminRoute {
   title: string;
@@ -23,8 +23,8 @@ export const adminRoutes: AdminRoute[] = [
     title: 'Settings',
     link: '/admin/settings',
     icon: SettingsIcon,
-  },    
-]
+  },
+];
 
 export const userRoutes: AdminRoute[] = [
   {
@@ -42,7 +42,7 @@ export const userRoutes: AdminRoute[] = [
     link: '/user/settings',
     icon: SettingsIcon,
   },
-]
+];
 
 export const ownerRoutes: AdminRoute[] = [
   {
@@ -60,4 +60,4 @@ export const ownerRoutes: AdminRoute[] = [
     link: '/owner/settings',
     icon: SettingsIcon,
   },
-]
+];

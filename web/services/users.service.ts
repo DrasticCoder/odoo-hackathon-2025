@@ -9,6 +9,6 @@ export class UsersService {
   }
 
   static async update(id: string, data: UpdateUserPayload) {
-  return await ApiClient.patch<User, UpdateUserPayload>(`/api/users/${id}`, data);
+    return await ApiClient.patch<User, UpdateUserPayload>(`/api/users/${id}`, data);
   }
 }

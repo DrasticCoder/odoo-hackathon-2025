@@ -11,10 +11,8 @@ export type MediaUploaderProps = {
   onUpload?: (urls: string[]) => void;
 };
 
-const CLOUDINARY_UPLOAD_PRESET =
-  process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '';
-const CLOUDINARY_CLOUD_NAME =
-  process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
+const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '';
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
 
 export const MediaUploader: React.FC<MediaUploaderProps> = ({
   className,
@@ -30,8 +28,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const acceptTypes =
-    type === 'image' ? 'image/*' : type === 'video' ? 'video/*' : '*';
+  const acceptTypes = type === 'image' ? 'image/*' : type === 'video' ? 'video/*' : '*';
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -48,10 +45,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
       if (folderName) formData.append('folder', folderName);
       try {
         const xhr = new XMLHttpRequest();
-        xhr.open(
-          'POST',
-          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
-        );
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`);
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
             setProgress(Math.round((event.loaded / event.total) * 100));
@@ -117,9 +111,9 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
   return (
     <Card
       className={cn(
-        'w-full max-w-md mx-auto p-4 flex flex-col items-center border-2 border-dashed transition-colors',
+        'mx-auto flex w-full max-w-md flex-col items-center border-2 border-dashed p-4 transition-colors',
         dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-200',
-        className,
+        className
       )}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
@@ -127,72 +121,58 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
     >
       <input
         ref={inputRef}
-        type="file"
+        type='file'
         accept={acceptTypes}
         multiple={multiple}
-        className="hidden"
+        className='hidden'
         onChange={handleInputChange}
       />
       <div
-        className="w-full flex flex-col items-center justify-center cursor-pointer py-8"
+        className='flex w-full cursor-pointer flex-col items-center justify-center py-8'
         onClick={() => inputRef.current?.click()}
         tabIndex={0}
-        role="button"
-        aria-label="Upload files"
+        role='button'
+        aria-label='Upload files'
       >
-        <span className="text-lg font-medium mb-2">
-          Drag & drop or click to upload {type}(s)
-        </span>
-        <span className="text-xs text-gray-500">
-          {multiple
-            ? 'You can select multiple files.'
-            : 'Only one file allowed.'}
+        <span className='mb-2 text-lg font-medium'>Drag & drop or click to upload {type}(s)</span>
+        <span className='text-xs text-gray-500'>
+          {multiple ? 'You can select multiple files.' : 'Only one file allowed.'}
         </span>
       </div>
       {uploading && (
-        <div className="w-full mt-4">
-          <div className="h-2 bg-gray-200 rounded">
-            <div
-              className="h-2 bg-blue-500 rounded transition-all"
-              style={{ width: `${progress}%` }}
-            />
+        <div className='mt-4 w-full'>
+          <div className='h-2 rounded bg-gray-200'>
+            <div className='h-2 rounded bg-blue-500 transition-all' style={{ width: `${progress}%` }} />
           </div>
-          <div className="text-xs text-gray-500 mt-1">
-            Uploading... {progress}%
-          </div>
+          <div className='mt-1 text-xs text-gray-500'>Uploading... {progress}%</div>
         </div>
       )}
-      {error && <div className="text-red-500 mt-2">{error}</div>}
+      {error && <div className='mt-2 text-red-500'>{error}</div>}
       {previews.length > 0 && (
-        <div className="w-full mt-4 grid grid-cols-2 gap-2">
+        <div className='mt-4 grid w-full grid-cols-2 gap-2'>
           {previews.map((url, idx) =>
             type === 'image' ? (
               <Image
                 key={idx}
                 src={url}
-                alt="preview"
+                alt='preview'
                 width={128}
                 height={128}
-                className="w-full h-32 object-cover rounded shadow"
+                className='h-32 w-full rounded object-cover shadow'
               />
             ) : type === 'video' ? (
-              <video
-                key={idx}
-                src={url}
-                controls
-                className="w-full h-32 object-cover rounded shadow"
-              />
+              <video key={idx} src={url} controls className='h-32 w-full rounded object-cover shadow' />
             ) : (
               <a
                 key={idx}
                 href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-blue-600 underline truncate"
+                target='_blank'
+                rel='noopener noreferrer'
+                className='block truncate text-blue-600 underline'
               >
                 {url.split('/').pop()}
               </a>
-            ),
+            )
           )}
         </div>
       )}
