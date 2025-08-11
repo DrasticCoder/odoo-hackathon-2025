@@ -5,6 +5,12 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './auth/auth.module';
+import { FacilitiesModule } from './facilities/facilities.module';
+import { UsersModule } from './users/users.module';
+import { BookingsModule } from './bookings/bookings.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { MailModule } from './mail/mail.module';
+import { LLMModule } from './llm/llm.module';
 import { LokiOptions } from 'pino-loki';
 import { config } from './common/config';
 
@@ -49,7 +55,13 @@ import { config } from './common/config';
         level: 'debug',
       },
     }),
+    PrismaModule,
     AuthModule,
+    FacilitiesModule,
+    UsersModule,
+    BookingsModule,
+    MailModule,
+    LLMModule,
   ],
   controllers: [AppController],
   providers: [

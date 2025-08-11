@@ -8,31 +8,260 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  ADMIN
+  OWNER
+  USER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  FAILED
+}
+
+enum FacilityStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWED
+  ACTIONED
+  CLOSED
+}
+
+enum MatchStatus {
+  OPEN
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String   @unique
-  name      String?
-  avatarUrl String?  @map("avatar_url")
-  role      UserRole @default(USER)
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @map("updated_at")
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  passwordHash String?  @map("password_hash") // optional: safe to add
+  name         String?  @map("full_name")
+  avatarUrl    String?  @map("avatar_url")
+  role         UserRole @default(USER)
+  isVerified   Boolean  @default(false) @map("is_verified")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+
+  // inverse relations (safe to add)
+  facilities   Facility[]    @relation("OwnerFacilities")
+  bookings     Booking[]     @relation("UserBookings")
+  reviews      Review[]      @relation("UserReviews")
+  otps         Otp[]         @relation("UserOtps")
+  reports      Report[]      @relation("ReporterReports")
+  adminActions AdminAction[] @relation("AdminActions")
+  photos       Photo[]       @relation("UserPhotos")
+  matches      Match[]       @relation("UserMatches")
 
   @@map("users")
 }
 
+/**
+ * OTPs used for verification.
+ * NOTE: kept `email` unique to match your existing auth flow where OTP email was unique.
+ * Also added userId optional so OTP can associate with a user if desired.
+ */
 model Otp {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?  @map("user_id") @db.ObjectId
   email     String   @unique
-  otp       String
-  expiresAt DateTime
+  otp       String // keep field name `otp` to avoid breaking existing code
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")
 
+  user User? @relation("UserOtps", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([expiresAt])
   @@map("otps")
 }
 
-enum UserRole {
-  ADMIN
-  USER
+model Facility {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId       String         @map("owner_id") @db.ObjectId
+  name          String
+  description   String?
+  address       String
+  shortLocation String?        @map("short_location")
+  status        FacilityStatus @default(PENDING_APPROVAL)
+  amenities     Json?          @map("amenities")
+  about         String?        @map("about")
+  avgRating     Float?         @map("avg_rating")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @default(now()) @map("updated_at")
+
+  owner    User      @relation("OwnerFacilities", fields: [ownerId], references: [id])
+  courts   Court[]
+  photos   Photo[]
+  reviews  Review[]
+  bookings Booking[] @relation("FacilityBookings")
+
+  @@index([ownerId])
+  @@index([status])
+  @@map("facilities")
+}
+
+model Court {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  facilityId     String   @map("facility_id") @db.ObjectId
+  name           String
+  sportType      String   @map("sport_type")
+  pricePerHour   Float    @map("price_per_hour")
+  isActive       Boolean  @default(true) @map("is_active")
+  operatingHours Json?    @map("operating_hours")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @map("updated_at")
+
+  facility     Facility           @relation(fields: [facilityId], references: [id])
+  availability AvailabilitySlot[]
+  bookings     Booking[]          @relation("CourtBookings")
+  photos       Photo[]
+
+  @@index([facilityId])
+  @@index([sportType])
+  @@map("courts")
+}
+
+model AvailabilitySlot {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  courtId   String   @map("court_id") @db.ObjectId
+  start     DateTime @map("start_datetime")
+  end       DateTime @map("end_datetime")
+  isBlocked Boolean  @default(false) @map("is_blocked")
+  reason    String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  court Court @relation(fields: [courtId], references: [id])
+
+  @@index([courtId])
+  @@index([start])
+  @@index([end])
+  @@map("availability_slots")
+}
+
+model Booking {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String        @map("user_id") @db.ObjectId
+  courtId       String        @map("court_id") @db.ObjectId
+  facilityId    String        @map("facility_id") @db.ObjectId
+  startDatetime DateTime      @map("start_datetime")
+  endDatetime   DateTime      @map("end_datetime")
+  totalPrice    Float         @map("total_price")
+  status        BookingStatus @default(PENDING)
+  txnReference  String?       @map("txn_reference")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @default(now()) @map("updated_at")
+
+  user     User     @relation("UserBookings", fields: [userId], references: [id])
+  court    Court    @relation("CourtBookings", fields: [courtId], references: [id])
+  facility Facility @relation("FacilityBookings", fields: [facilityId], references: [id])
+
+  @@index([courtId])
+  @@index([userId])
+  @@index([status])
+  @@index([startDatetime])
+  @@index([endDatetime])
+  @@map("bookings")
+}
+
+model Review {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @map("user_id") @db.ObjectId
+  facilityId String   @map("facility_id") @db.ObjectId
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     User     @relation("UserReviews", fields: [userId], references: [id])
+  facility Facility @relation(fields: [facilityId], references: [id])
+
+  @@index([facilityId])
+  @@map("reviews")
+}
+
+model Photo {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  url        String
+  caption    String?
+  facilityId String?  @map("facility_id") @db.ObjectId
+  courtId    String?  @map("court_id") @db.ObjectId
+  userId     String?  @map("user_id") @db.ObjectId
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  facility Facility? @relation(fields: [facilityId], references: [id])
+  court    Court?    @relation(fields: [courtId], references: [id])
+  user     User?     @relation("UserPhotos", fields: [userId], references: [id])
+
+  @@index([facilityId])
+  @@index([courtId])
+  @@map("photos")
+}
+
+model Report {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  reporterId String       @map("reporter_id") @db.ObjectId
+  targetType String       @map("target_type")
+  targetId   String       @map("target_id")
+  reason     String
+  status     ReportStatus @default(OPEN)
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @default(now()) @map("updated_at")
+
+  reporter User @relation("ReporterReports", fields: [reporterId], references: [id])
+
+  @@index([reporterId])
+  @@index([status])
+  @@map("reports")
+}
+
+model AdminAction {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  adminId    String   @map("admin_id") @db.ObjectId
+  action     String
+  targetType String   @map("target_type")
+  targetId   String   @map("target_id")
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  admin User @relation("AdminActions", fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@map("admin_actions")
+}
+
+model Match {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  creatorId    String      @map("creator_id") @db.ObjectId
+  facilityId   String?     @map("facility_id") @db.ObjectId
+  courtId      String?     @map("court_id") @db.ObjectId
+  sportType    String      @map("sport_type")
+  dateTime     DateTime    @map("date_time")
+  maxPlayers   Int         @map("max_players")
+  participants String[]    @map("participants")
+  status       MatchStatus @default(OPEN)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @default(now()) @map("updated_at")
+
+  creator User? @relation("UserMatches", fields: [creatorId], references: [id])
+
+  @@index([creatorId])
+  @@index([facilityId])
+  @@index([dateTime])
+  @@map("matches")
 }

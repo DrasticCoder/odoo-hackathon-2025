@@ -12,8 +12,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: 'Opengig Template',
-  description: 'Opengig Template',
+  title: 'QuickCourt - Sports Facility Booking',
+  description: 'Book your favorite sports facilities with ease',
 };
 
 export default async function RootLayout({
