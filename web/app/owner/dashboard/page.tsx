@@ -52,12 +52,12 @@ export default function OwnerDashboard() {
   return (
     <AuthGuard requiredRole={UserRole.OWNER}>
       <DashboardLayout>
-        <div className='space-y-6 p-6'>
+        <div className='space-y-6 p-6 bg-background'>
           {/* Header */}
           <div className='flex items-center justify-between'>
             <div>
-              <h1 className='text-3xl font-bold text-gray-900'>Welcome back, {user?.name}! 🏟️</h1>
-              <p className='mt-1 text-gray-600'>Manage your sports facilities and grow your business</p>
+              <h1 className='text-3xl font-bold text-gray-300'>Welcome back, {user?.name}! 🏟️</h1>
+              <p className='mt-1 text-gray-400'>Manage your sports facilities and grow your business</p>
             </div>
             <div className='flex gap-3'>
               <Button asChild className='bg-orange-500 hover:bg-orange-600'>
