@@ -6,5 +6,7 @@ export interface RequestUser {
   name: string;
   avatarUrl?: string | null;
   role: UserRole;
+  isVerified: boolean;
+  isActive: boolean;
   sub: string;
 }

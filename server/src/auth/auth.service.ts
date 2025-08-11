@@ -1,10 +1,12 @@
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { Auth, google } from 'googleapis';
 import { config } from 'src/common/config';
 import { generateOtp } from 'src/common/utils/auth.utils';
 import { MailService } from 'src/mail/mail.service';
+import { SignUpDto, LoginDto } from './dto/auth.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -49,6 +51,7 @@ export class AuthService {
             email,
             name: `${given_name} ${family_name}`,
             avatarUrl: picture,
+            isVerified: true,
           },
         });
       }
@@ -58,6 +61,8 @@ export class AuthService {
         avatarUrl: user?.avatarUrl,
         name: user?.name ?? 'Unknown',
         role: user?.role,
+        isVerified: user?.isVerified,
+        isActive: user?.isActive,
         sub: googleId,
       };
 
@@ -72,6 +77,8 @@ export class AuthService {
           name: user.name,
           avatarUrl: user.avatarUrl,
           role: user.role,
+          isVerified: user.isVerified,
+          isActive: user.isActive,
         },
       };
     } catch (error) {
@@ -128,7 +135,15 @@ export class AuthService {
     });
     if (!user) {
       user = await this.prismaService.user.create({
-        data: { email },
+        data: {
+          email,
+          isVerified: true,
+        },
+      });
+    } else {
+      user = await this.prismaService.user.update({
+        where: { id: user.id },
+        data: { isVerified: true },
       });
     }
     const jwtPayload = {
@@ -137,6 +152,8 @@ export class AuthService {
       avatarUrl: user?.avatarUrl,
       name: user?.name ?? 'Unknown',
       role: user?.role,
+      isVerified: user?.isVerified,
+      isActive: user?.isActive,
       sub: user.id,
     };
     const token = await this.jwtService.signAsync(jwtPayload, {
@@ -150,11 +167,16 @@ export class AuthService {
         name: user.name,
         avatarUrl: user.avatarUrl,
         role: user.role,
+        isVerified: user.isVerified,
+        isActive: user.isActive,
       },
     };
   }
   private async generateAndSendOtp(email: string) {
     const otp = config.env === 'development' ? '123456' : generateOtp();
+    await this.prismaService.otp.deleteMany({
+      where: { email },
+    });
     await this.prismaService.otp.create({
       data: {
         email,
@@ -171,5 +193,107 @@ export class AuthService {
         validity: 5,
       },
     });
+  }
+
+  async signUp(signUpDto: SignUpDto) {
+    const { email, password, name, role, avatarUrl } = signUpDto;
+
+    const existingUser = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    const user = await this.prismaService.user.create({
+      data: {
+        email,
+        passwordHash,
+        name,
+        role: role || 'USER',
+        avatarUrl,
+        isVerified: false,
+      },
+    });
+
+    await this.generateAndSendOtp(email);
+
+    return {
+      message: 'User created successfully. Please verify your email with the OTP sent.',
+      userId: user.id,
+    };
+  }
+
+  async login(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+
+    const user = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    if (!user || !user.passwordHash) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Account is deactivated');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!user.isVerified) {
+      throw new UnauthorizedException('Please verify your email first');
+    }
+    const jwtPayload = {
+      id: user.id,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+      name: user.name ?? 'Unknown',
+      role: user.role,
+      isVerified: user.isVerified,
+      isActive: user.isActive,
+      sub: user.id,
+    };
+
+    const token = await this.jwtService.signAsync(jwtPayload, {
+      expiresIn: config.jwt.expiresIn,
+    });
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        role: user.role,
+        isVerified: user.isVerified,
+        isActive: user.isActive,
+      },
+    };
+  }
+
+  async resendVerificationOtp(email: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (user.isVerified) {
+      throw new ConflictException('User is already verified');
+    }
+
+    await this.generateAndSendOtp(email);
+    return { message: 'Verification OTP sent successfully' };
   }
 }

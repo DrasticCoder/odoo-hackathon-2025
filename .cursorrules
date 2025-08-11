@@ -13,6 +13,7 @@
 ### Development
 
 1. **Start Backend Server**
+
    ```bash
    cd server
    pnpm start:dev
@@ -61,6 +62,7 @@
 ### Frontend Standards
 
 1. **Components**
+
    - Use functional components with hooks
    - Follow atomic design principles
    - Place reusable components in `components/` directory
@@ -69,16 +71,19 @@
    - Follow DRY principle
 
 2. **State Management**
+
    - Use React hooks for local state
    - Implement global state in `store/` directory
    - Keep state logic separate from UI components
 
 3. **API Integration**
+
    - Use services from `services/` directory for all API calls
    - Create type-safe service methods using ApiClient
    - Implement proper loading states and error handling
    - Never call API endpoints directly; always create a service method
    - Example service pattern:
+
      ```typescript
      // services/user.service.ts
      import { ApiClient } from '@/lib/api-client';
@@ -103,12 +108,14 @@
 ### Backend Standards
 
 1. **Architecture**
+
    - Follow NestJS module architecture
    - Use dependency injection
    - Implement DTOs for data validation, add ApiProperty Tag to each dto field for swagger
    - Follow RESTful API conventions
 
 2. **Database**
+
    - Use Prisma for database operations
    - Write clean and optimized queries
    - Use transactions where necessary
@@ -140,13 +147,14 @@ if (response.data) {
 }
 
 // POST request with data
-const loginResponse = await ApiClient.post<LoginResponse>('/api/auth/login', { 
-  email, 
-  password 
+const loginResponse = await ApiClient.post<LoginResponse>('/api/auth/login', {
+  email,
+  password,
 });
 ```
 
 Return type for all API calls:
+
 ```typescript
 type ApiResult<T> =
   | {
@@ -166,6 +174,7 @@ type ApiResult<T> =
 ### Authentication System
 
 The authentication system provides:
+
 - JWT-based authentication with automatic token handling
 - Multiple authentication methods:
   - Google OAuth authentication
@@ -179,6 +188,7 @@ The authentication system provides:
 ### Email Templates
 
 The email service features:
+
 - Type-safe template system with HTML support
 - Built-in templates for OTP and Welcome emails
 - Easy template creation with TypeScript types
@@ -190,6 +200,7 @@ The email service features:
 ### LLM Service
 
 The LLM service features:
+
 - Type-safe interaction with Large Language Models
 - Support for both string and JSON responses
 - Configurable retry mechanisms with exponential backoff
@@ -200,6 +211,452 @@ The LLM service features:
 [Detailed LLM Service Documentation](./docs/llm-service.md)
 
 ## Extract Text Util Function (server/src/common/utils/extractText.utils.ts)
+
 - Extract Text from File
 - Supported File Types : PDF, DOCX, TEXT, CSV, XLSX
 - Just Call extract `async extractTextFromDocument(file: Express.Multer.File):string` function.
+
+---
+
+# STICK TO THIS PROBLEM STATEMENT :
+
+QuicfiCourt - A Local Sports Boofiing
+Overview
+QuickCourt is a platform that enables sports enthusiasts to book local sports facilities (e.g., badminton courts, turf grounds, tennis tables) and create or join matches with others in their area. Your goal is to build a full-stack web application that facilitates this end-to-end expe- rience, ensuring a smooth user experience, booking accuracy, and community engagement.
+
+Roles
+User
+
+    Facility Owner  Admin
+
+User Role
+Features G Functionalities
+Authentication
+
+Login with email and password
+Sign up with email, password, full name, avatar, and role OTP verification step after signup
+Home Page
+Welcome banner or carousel Quick access to:
+Popular venues
+Popular sports
+
+Venues Page
+List of all approved sports venues Search for a venue
+Filters: sport type, price, venue type, rating Pagination
+Each card displays:
+Venue Name
+Sport Type(s)
+Starting Price per hour
+Short Location
+Rating (if reviews implemented)
+
+Single Venue Page
+Full details of the selected venue:
+Name, description, address
+List of Sports available
+Amenities
+About Venue
+Photo gallery
+Reviews section
+
+Action: Book Now button
+Court Booking Page
+Select court and time slot View price and total
+Proceed to confirm and simulate payment After success, redirect to "My Bookings"
+Profile Page
+Display user details: Name, Email Allow edit/update info
+Tabs: My Bookings
+My Bookings Page
+List of all court bookings Each booking card shows:
+Venue name, sport type, court name
+Date and time of booking
+Status: Confirmed / Cancelled / Completed
+Action: Cancel button (if in the future) Optional: Filters by date or status
+
+Facility Owner Role
+Features G Functionalities
+Dashboard
+
+Welcome message and KPIs:
+Total Bookings
+Active Courts
+Earnings (simulated)
+Booking Calendar
+Charts to implement:
+Daily/Weekly/Monthly Booking Trends (Line/Bar Chart)
+Earnings Summary (Bar or Doughnut Chart)
+Peak Booking Hours (Heatmap or Area Chart)
+Facility Management Page
+
+Add/Edit facility details:
+Name, location, description
+Type of sports supported
+Amenities offered
+Upload multiple photos
+Court Management Page:
+Court name, sport type
+Pricing per hour
+Operating hours
+Edit/delete existing courts
+
+Time Slot Management
+
+Set availability for each court
+Block time slots for maintenance
+
+Booking Overview Page
+
+View upcoming and past bookings Each record shows:
+User name, court, time
+Status: Booked / Cancelled / Completed
+
+Profile Page
+
+Display owner details Allow edit/update info
+
+Admin Role
+Features G Functionalities
+Dashboard
+
+Global stats overview:
+Total users
+Total facility owners
+Total bookings
+Total active courts
+Charts to implement:
+Booking Activity Over Time (Line or Bar Chart)
+User Registration Trends
+Facility Approval Trend
+Most Active Sports
+Earnings Simulation Chart
+Facility Approval Page
+
+View list of pending facility registrations Approve or reject with optional comments See submitted facility details and photos
+User Management Page
+List of all users and facility owners Search and filter by role or status Actions:
+Ban/unban user
+View user booking history
+
+Reports s Moderation Page (Optional)
+
+View reports submitted by users
+Take action on flagged facilities or users
+Profile Page
+
+Display admin profile
+Allow basic info update
+
+mockups: https://link.excalidraw.com/l/65VNwvy7c4X/AU4FuaybEgm
+
+---
+
+## STICK TO THIS PRISMA SCHEMA
+
+```
+generator client {
+  provider = "prisma-client-js"
+  output   = "client"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * Enums (merged - includes OWNER but keeps ADMIN/USER)
+ */
+enum UserRole {
+  ADMIN
+  OWNER
+  USER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  FAILED
+}
+
+enum FacilityStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWED
+  ACTIONED
+  CLOSED
+}
+
+enum MatchStatus {
+  OPEN
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+/**
+ * Models
+ */
+
+/**
+ * Users (keeps existing fields & behavior; adds optional passwordHash/isVerified without breaking
+ * existing flow)
+ */
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  passwordHash String?  @map("password_hash") // optional: safe to add
+  name         String?  @map("full_name")
+  avatarUrl    String?  @map("avatar_url")
+  role         UserRole @default(USER)
+  isVerified   Boolean  @default(false) @map("is_verified")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+
+  // inverse relations (safe to add)
+  facilities   Facility[]    @relation("OwnerFacilities")
+  bookings     Booking[]     @relation("UserBookings")
+  reviews      Review[]      @relation("UserReviews")
+  otps         Otp[]         @relation("UserOtps")
+  reports      Report[]      @relation("ReporterReports")
+  adminActions AdminAction[] @relation("AdminActions")
+  photos       Photo[]       @relation("UserPhotos")
+  matches      Match[]       @relation("UserMatches")
+
+  @@map("users")
+}
+
+/**
+ * OTPs used for verification.
+ * NOTE: kept `email` unique to match your existing auth flow where OTP email was unique.
+ * Also added userId optional so OTP can associate with a user if desired.
+ */
+model Otp {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?  @map("user_id") @db.ObjectId
+  email     String   @unique
+  otp       String // keep field name `otp` to avoid breaking existing code
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  user User? @relation("UserOtps", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("otps")
+}
+
+/**
+ * Facility / Venue
+ */
+model Facility {
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  ownerId       String         @map("owner_id") @db.ObjectId
+  name          String
+  description   String?
+  address       String
+  shortLocation String?        @map("short_location")
+  status        FacilityStatus @default(PENDING_APPROVAL)
+  amenities     Json?          @map("amenities")
+  about         String?        @map("about")
+  avgRating     Float?         @map("avg_rating")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @default(now()) @map("updated_at")
+
+  owner    User      @relation("OwnerFacilities", fields: [ownerId], references: [id])
+  courts   Court[]
+  photos   Photo[]
+  reviews  Review[]
+  bookings Booking[] @relation("FacilityBookings")
+
+  @@index([ownerId])
+  @@index([status])
+  @@map("facilities")
+}
+
+/**
+ * Courts
+ */
+model Court {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  facilityId     String   @map("facility_id") @db.ObjectId
+  name           String
+  sportType      String   @map("sport_type")
+  pricePerHour   Float    @map("price_per_hour")
+  isActive       Boolean  @default(true) @map("is_active")
+  operatingHours Json?    @map("operating_hours")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @map("updated_at")
+
+  facility     Facility           @relation(fields: [facilityId], references: [id])
+  availability AvailabilitySlot[]
+  bookings     Booking[]          @relation("CourtBookings")
+  photos       Photo[]
+
+  @@index([facilityId])
+  @@index([sportType])
+  @@map("courts")
+}
+
+/**
+ * Availability / blocked slots
+ */
+model AvailabilitySlot {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  courtId   String   @map("court_id") @db.ObjectId
+  start     DateTime @map("start_datetime")
+  end       DateTime @map("end_datetime")
+  isBlocked Boolean  @default(false) @map("is_blocked")
+  reason    String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  court Court @relation(fields: [courtId], references: [id])
+
+  @@index([courtId])
+  @@index([start])
+  @@index([end])
+  @@map("availability_slots")
+}
+
+/**
+ * Bookings
+ */
+model Booking {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String        @map("user_id") @db.ObjectId
+  courtId       String        @map("court_id") @db.ObjectId
+  facilityId    String        @map("facility_id") @db.ObjectId
+  startDatetime DateTime      @map("start_datetime")
+  endDatetime   DateTime      @map("end_datetime")
+  totalPrice    Float         @map("total_price")
+  status        BookingStatus @default(PENDING)
+  txnReference  String?       @map("txn_reference")
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @default(now()) @map("updated_at")
+
+  user     User     @relation("UserBookings", fields: [userId], references: [id])
+  court    Court    @relation("CourtBookings", fields: [courtId], references: [id])
+  facility Facility @relation("FacilityBookings", fields: [facilityId], references: [id])
+
+  @@index([courtId])
+  @@index([userId])
+  @@index([status])
+  @@index([startDatetime])
+  @@index([endDatetime])
+  @@map("bookings")
+}
+
+/**
+ * Reviews
+ */
+model Review {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @map("user_id") @db.ObjectId
+  facilityId String   @map("facility_id") @db.ObjectId
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user     User     @relation("UserReviews", fields: [userId], references: [id])
+  facility Facility @relation(fields: [facilityId], references: [id])
+
+  @@index([facilityId])
+  @@map("reviews")
+}
+
+/**
+ * Photos - polymorphic
+ */
+model Photo {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  url        String
+  caption    String?
+  facilityId String?  @map("facility_id") @db.ObjectId
+  courtId    String?  @map("court_id") @db.ObjectId
+  userId     String?  @map("user_id") @db.ObjectId
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  facility Facility? @relation(fields: [facilityId], references: [id])
+  court    Court?    @relation(fields: [courtId], references: [id])
+  user     User?     @relation("UserPhotos", fields: [userId], references: [id])
+
+  @@index([facilityId])
+  @@index([courtId])
+  @@map("photos")
+}
+
+/**
+ * Reports
+ */
+model Report {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  reporterId String       @map("reporter_id") @db.ObjectId
+  targetType String       @map("target_type")
+  targetId   String       @map("target_id")
+  reason     String
+  status     ReportStatus @default(OPEN)
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @default(now()) @map("updated_at")
+
+  reporter User @relation("ReporterReports", fields: [reporterId], references: [id])
+
+  @@index([reporterId])
+  @@index([status])
+  @@map("reports")
+}
+
+/**
+ * AdminAction (audit)
+ */
+model AdminAction {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  adminId    String   @map("admin_id") @db.ObjectId
+  action     String
+  targetType String   @map("target_type")
+  targetId   String   @map("target_id")
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  admin User @relation("AdminActions", fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@map("admin_actions")
+}
+
+/**
+ * Match (community feature)
+ */
+model Match {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  creatorId    String      @map("creator_id") @db.ObjectId
+  facilityId   String?     @map("facility_id") @db.ObjectId
+  courtId      String?     @map("court_id") @db.ObjectId
+  sportType    String      @map("sport_type")
+  dateTime     DateTime    @map("date_time")
+  maxPlayers   Int         @map("max_players")
+  participants String[]    @map("participants")
+  status       MatchStatus @default(OPEN)
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @default(now()) @map("updated_at")
+
+  creator User? @relation("UserMatches", fields: [creatorId], references: [id])
+
+  @@index([creatorId])
+  @@index([facilityId])
+  @@index([dateTime])
+  @@map("matches")
+}
+
+```

@@ -1,9 +1,6 @@
 import { envConfig } from '@/config';
 import axios, { AxiosRequestConfig, AxiosResponse, isAxiosError } from 'axios';
 import { parseMessage } from '@/utils';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { getSession } from 'next-auth/react';
 
 type ApiResult<T> =
   | {
@@ -22,22 +19,42 @@ type ApiResult<T> =
 export class ApiClient {
   static async request<T>(config: AxiosRequestConfig): Promise<ApiResult<T>> {
     try {
-      const isServer = typeof window === 'undefined';
-      const session = isServer ? await getServerSession(authOptions) : await getSession();
+      // Get token from localStorage (client-side) or from auth store
+      const getToken = () => {
+        if (typeof window !== 'undefined') {
+          return localStorage.getItem('auth_token');
+        }
+        return null;
+      };
 
+      const token = getToken();
       const isFormData = config.data instanceof FormData;
 
       const client = axios.create({
         baseURL: envConfig.apiUrl,
         headers: {
           ...(config.data && !isFormData ? { 'Content-Type': 'application/json' } : {}),
-          Authorization: `Bearer ${session?.user?.token}`,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
+
       const response: AxiosResponse<T> = await client.request(config);
       return { data: response.data };
     } catch (err) {
       if (isAxiosError(err)) {
+        // Handle 401 errors by clearing token, but only redirect if not on auth pages
+        if (err.response?.status === 401 && typeof window !== 'undefined') {
+          localStorage.removeItem('auth_token');
+
+          // Only redirect if not already on an auth page
+          const currentPath = window.location.pathname;
+          const isAuthPage = currentPath.startsWith('/auth') || currentPath === '/unauthorized';
+
+          if (!isAuthPage) {
+            window.location.href = '/auth/login';
+          }
+        }
+
         return {
           error: {
             message: parseMessage(err.response?.data.message),

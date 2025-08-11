@@ -18,12 +18,19 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!user.id || !user.email) {
       throw new UnauthorizedException('Invalid token payload');
     }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Account is deactivated');
+    }
+
     return {
       id: user.id,
       email: user.email,
       role: user.role,
       name: user.name,
       avatarUrl: user.avatarUrl,
+      isVerified: user.isVerified,
+      isActive: user.isActive,
     };
   }
 }
