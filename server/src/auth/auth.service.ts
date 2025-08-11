@@ -154,7 +154,7 @@ export class AuthService {
     };
   }
   private async generateAndSendOtp(email: string) {
-    const otp = generateOtp();
+    const otp = config.env === 'development' ? '123456' : generateOtp();
     await this.prismaService.otp.create({
       data: {
         email,
