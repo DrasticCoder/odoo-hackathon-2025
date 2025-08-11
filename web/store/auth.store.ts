@@ -27,7 +27,6 @@ export type AuthStore = AuthState & AuthActions;
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
-      // State
       user: null,
       token: null,
       isAuthenticated: false,
@@ -90,8 +89,6 @@ export const useAuthStore = create<AuthStore>()(
       // Initialize auth state from persisted data
       initialize: async () => {
         const token = AuthService.getToken();
-        const state = get();
-
         if (token) {
           // If we have a token, verify it with the server
           try {
@@ -109,6 +106,7 @@ export const useAuthStore = create<AuthStore>()(
             }
           } catch (error) {
             // Token is invalid or expired, clear auth state
+            console.error('Failed to initialize auth state:', error);
             get().clearAuth();
           }
         } else if (!token) {

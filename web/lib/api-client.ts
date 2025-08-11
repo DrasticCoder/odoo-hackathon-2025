@@ -1,9 +1,6 @@
 import { envConfig } from '@/config';
 import axios, { AxiosRequestConfig, AxiosResponse, isAxiosError } from 'axios';
 import { parseMessage } from '@/utils';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { getSession } from 'next-auth/react';
 
 type ApiResult<T> =
   | {
