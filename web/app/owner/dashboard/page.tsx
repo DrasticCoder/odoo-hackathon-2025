@@ -137,13 +137,13 @@ export default function OwnerDashboardPage() {
               <p className='mt-1 text-gray-400'>Manage your sports facilities and grow your business</p>
             </div>
             <div className='flex gap-3'>
-              <Button asChild className='bg-primary hover:bg-sidebar-primary'>
+              <Button>
                 <Link href='/owner/facilities/add'>
                   <Plus className='mr-2 h-4 w-4' />
                   Add Facility
                 </Link>
               </Button>
-              <Button asChild variant='outline'>
+              <Button variant='outline'>
                 <Link href='/owner/analytics'>
                   <BarChart3 className='mr-2 h-4 w-4' />
                   Analytics

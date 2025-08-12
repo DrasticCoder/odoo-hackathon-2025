@@ -354,12 +354,41 @@ export class BookingsService {
       }),
     ]);
 
+    // Build monthly bookings for the last 12 months (safe approach without raw/groupBy)
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startWindow = new Date(startOfThisMonth);
+    startWindow.setMonth(startWindow.getMonth() - 11);
+
+    const monthlySeed: { [k: string]: number } = {};
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(startWindow.getFullYear(), startWindow.getMonth() + i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      monthlySeed[key] = 0;
+    }
+
+    const monthlySource = await this.prisma.booking.findMany({
+      where: { ...where, startDatetime: { gte: startWindow } },
+      select: { startDatetime: true },
+    });
+
+    for (const b of monthlySource) {
+      const d = new Date(b.startDatetime);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (key in monthlySeed) monthlySeed[key] += 1;
+    }
+
+    const months = Object.keys(monthlySeed)
+      .sort()
+      .map((k) => ({ month: k, bookings: monthlySeed[k] }));
+
     return {
       totalBookings,
       confirmedBookings,
       cancelledBookings,
       totalRevenue: revenueResult._sum.totalPrice || 0,
       averageBookingValue: revenueResult._avg.totalPrice || 0,
+      monthlyBookings: months,
     };
   }
 

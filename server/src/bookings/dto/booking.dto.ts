@@ -177,4 +177,7 @@ export class BookingStatsDto {
 
   @ApiProperty({ description: 'Average booking value' })
   averageBookingValue: number;
+
+  @ApiProperty({ description: 'Monthly booking counts for the last 12 months', type: [Object] })
+  monthlyBookings?: { month: string; bookings: number }[];
 }

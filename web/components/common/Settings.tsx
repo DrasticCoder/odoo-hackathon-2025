@@ -92,6 +92,7 @@ export default function Settings() {
 
   const handleAvatarSelect = async (fileOrUrl: File | string) => {
     if (!user?.id) return;
+    console.log('handleAvatarSelect', fileOrUrl);
     // Our MediaUploader returns URL(s) via Cloudinary, so we only need the URL (if File, the component uploads and gives back URLs already)
     if (typeof fileOrUrl === 'string') {
       setSaving(true);

@@ -1,6 +1,6 @@
 'use client';
 
-import { OwnerSidebar } from '@/components/OwnerSidebar';
+//import { OwnerSidebar } from '@/components/OwnerSidebar';
 
 interface OwnerLayoutProps {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ interface OwnerLayoutProps {
 export function OwnerLayout({ children }: OwnerLayoutProps) {
   return (
     <div className='bg-background flex h-screen'>
-      <OwnerSidebar />
+      {/* <OwnerSidebar /> */}
       <main className='flex-1 overflow-auto'>{children}</main>
     </div>
   );

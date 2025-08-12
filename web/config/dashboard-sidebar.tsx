@@ -1,6 +1,19 @@
 // create interface with title , link,icon
-
-import { SettingsIcon, Home, UsersIcon } from 'lucide-react';
+import {
+  Calendar,
+  ChevronLeft,
+  Home,
+  LogOut,
+  Menu,
+  Settings,
+  Building2,
+  BarChart3,
+  Users,
+  Shield,
+  CalendarClock,
+  SettingsIcon,
+  UsersIcon,
+} from 'lucide-react';
 
 interface AdminRoute {
   title: string;
@@ -10,18 +23,18 @@ interface AdminRoute {
 
 export const adminRoutes: AdminRoute[] = [
   {
-    title: 'Dashboard',
-    link: '/admin/dashboard',
-    icon: Home,
-  },
-  {
-    title: 'Users',
+    title: 'User Management',
     link: '/admin/users',
-    icon: UsersIcon,
+    icon: Users,
   },
   {
-    title: 'Settings',
-    link: '/admin/settings',
+    title: 'Reports',
+    link: '/admin/reports',
+    icon: BarChart3,
+  },
+  {
+    title: 'Facility Approval',
+    link: '/admin/facility-approval',
     icon: SettingsIcon,
   },
 ];
@@ -37,27 +50,42 @@ export const userRoutes: AdminRoute[] = [
     link: '/user/profile',
     icon: UsersIcon,
   },
-  {
-    title: 'Settings',
-    link: '/user/settings',
-    icon: SettingsIcon,
-  },
 ];
 
 export const ownerRoutes: AdminRoute[] = [
   {
+    icon: Home,
     title: 'Dashboard',
     link: '/owner/dashboard',
-    icon: Home,
   },
   {
-    title: 'Properties',
-    link: '/owner/properties',
-    icon: UsersIcon,
+    icon: Building2,
+    title: 'Facilities',
+    link: '/owner/facilities',
   },
   {
-    title: 'Settings',
-    link: '/owner/settings',
-    icon: SettingsIcon,
+    icon: Shield,
+    title: 'Courts',
+    link: '/owner/courts',
+  },
+  {
+    icon: Calendar,
+    title: 'Bookings',
+    link: '/owner/bookings',
+  },
+  {
+    icon: CalendarClock,
+    title: 'Time Slots',
+    link: '/owner/availability',
+  },
+  {
+    icon: BarChart3,
+    title: 'Analytics',
+    link: '/owner/analytics',
+  },
+  {
+    icon: Users,
+    title: 'Customers',
+    link: '/owner/customers',
   },
 ];
