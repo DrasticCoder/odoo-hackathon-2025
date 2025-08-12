@@ -7,47 +7,25 @@ import { DashboardLayout } from '@/components/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Building2, Calendar, TrendingUp, RefreshCw, Shield, Activity, Server } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { RefreshCw, Shield, Activity, Server, FileCheck2, Ban, FileWarning } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { AnalyticsService, AnalyticsStats } from '@/services/analytics.service';
+// Charts removed from dashboard; detailed analytics available at /admin/analytics
 
 export default function AdminDashboard() {
   const user = useCurrentUser();
   const refreshUser = useRefreshUser();
-
-  const statsCards = [
-    {
-      title: 'Total Users',
-      value: '1,234',
-      description: '+20.1% from last month',
-      icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
-    },
-    {
-      title: 'Total Facilities',
-      value: '156',
-      description: '+12.5% from last month',
-      icon: Building2,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
-    },
-    {
-      title: 'Total Bookings',
-      value: '3,456',
-      description: '+8.2% from last month',
-      icon: Calendar,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
-    },
-    {
-      title: 'Revenue',
-      value: '₹45,231',
-      description: '+15.3% from last month',
-      icon: TrendingUp,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
-    },
-  ];
+  const [stats, setStats] = useState<AnalyticsStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  // Dashboard shows only high-level stats; detailed analytics moved to /admin/analytics
+  useEffect(() => {
+    AnalyticsService.getStats().then((data) => {
+      setStats(data);
+      setLoading(false);
+    });
+  }, []);
+  // No inline charts on dashboard
 
   return (
     <AuthGuard requiredRole={UserRole.ADMIN}>
@@ -80,32 +58,41 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-            {statsCards.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <motion.div
-                  key={stat.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card>
-                    <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                      <CardTitle className='text-sm font-medium'>{stat.title}</CardTitle>
-                      <div className={`rounded-full p-2 ${stat.bgColor}`}>
-                        <Icon className={`h-4 w-4 ${stat.color}`} />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className='text-2xl font-bold'>{stat.value}</div>
-                      <p className='mt-1 text-xs text-gray-600'>{stat.description}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
+          {/* Stats Grid (Live Analytics) */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="bg-primary text-primary-foreground shadow-xl">
+              <CardHeader>
+                <CardTitle>Total Users</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-extrabold">{loading ? <span className="animate-pulse">...</span> : stats?.totalUsers}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-secondary text-secondary-foreground shadow-xl">
+              <CardHeader>
+                <CardTitle>Total Facilities</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-extrabold">{loading ? <span className="animate-pulse">...</span> : stats?.totalFacilities}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-primary text-primary-foreground shadow-xl">
+              <CardHeader>
+                <CardTitle>Total Bookings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-extrabold">{loading ? <span className="animate-pulse">...</span> : stats?.totalBookings}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-secondary text-secondary-foreground shadow-xl">
+              <CardHeader>
+                <CardTitle>Total Revenue</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-extrabold">₹{loading ? <span className="animate-pulse">...</span> : stats?.totalRevenue?.toLocaleString()}</div>
+                <div className="text-xs mt-2 text-secondary-foreground/80">Avg. Booking Value: ₹{stats?.averageBookingValue?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+              </CardContent>
+            </Card>
           </div>
 
           <div className='grid gap-6 md:grid-cols-2'>
@@ -146,7 +133,9 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <Button variant='outline' className='mt-4 w-full'>
+                 <Link href='/admin/Activity'>
                   View All Activities
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -179,35 +168,73 @@ export default function AdminDashboard() {
                     <Badge className='bg-blue-100 text-blue-700'>89 online</Badge>
                   </div>
                 </div>
-                <Button variant='outline' className='mt-4 w-full'>
+                <Button variant='outline' className='mt-4 w-full'>              
+                  <Link href='/admin/logs'>
                   View System Logs
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
           </div>
 
-          {/* Platform Overview */}
-          <Card>
-            <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <TrendingUp className='h-5 w-5' />
-                Platform Analytics
-              </CardTitle>
-              <CardDescription>Comprehensive platform performance and growth metrics</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className='flex h-64 items-center justify-center rounded-lg border-2 border-dashed border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100'>
-                <div className='text-center'>
-                  <TrendingUp className='mx-auto mb-4 h-12 w-12 text-purple-400' />
-                  <p className='font-medium text-gray-600'>Advanced Analytics Dashboard</p>
-                  <p className='mt-1 text-sm text-gray-500'>User growth, revenue trends, and platform insights</p>
-                  <Button variant='outline' className='mt-4'>
-                    View Full Analytics
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Quick link to detailed analytics instead of inline charts */}
+          <div className='mt-4'>
+            <Card className='border-dashed'>
+              <CardHeader>
+                <CardTitle>Analytics Overview</CardTitle>
+                <CardDescription>View booking trends, sports popularity and status distribution</CardDescription>
+              </CardHeader>
+              <CardContent className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
+                <div className='text-sm text-muted-foreground'>Detailed interactive charts now live in the dedicated analytics page.</div>
+                <Button asChild>
+                  <Link href='/admin/analytics'>Go to Analytics</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+          {/* Admin Quick Links */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-8">
+            <Link href="/admin/facility-approval">
+              <Card className="hover:shadow-2xl transition-shadow cursor-pointer">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2"><FileCheck2 className="h-5 w-5" /> Facility Approval</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-lg font-bold">Approve or reject new facilities</div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/admin/user-management">
+              <Card className="hover:shadow-2xl transition-shadow cursor-pointer">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2"><Shield className="h-5 w-5" /> User Management</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-lg font-bold">Manage users and ban/unban</div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/admin/reports-moderation">
+              <Card className="hover:shadow-2xl transition-shadow cursor-pointer">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2"><FileWarning className="h-5 w-5" /> Reports Moderation</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-lg font-bold">Moderate user and facility reports</div>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/admin/user-ban-history">
+              <Card className="hover:shadow-2xl transition-shadow cursor-pointer">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2"><Ban className="h-5 w-5" /> User Ban History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-lg font-bold">View all banned users</div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
         </div>
       </DashboardLayout>
     </AuthGuard>
