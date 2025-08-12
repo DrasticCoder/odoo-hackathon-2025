@@ -202,7 +202,7 @@ export default function ChatBot() {
         <Card
           className={cn(
             'animate-in slide-in-from-bottom-5 fade-in-0 fixed right-6 bottom-6 z-50',
-            'flex h-[650px] w-[420px] flex-col duration-500',
+            'flex h-[600px] max-h-[90vh] w-[380px] max-w-[90vw] flex-col duration-500',
             'border-border/50 bg-background/95 border shadow-2xl backdrop-blur-xl',
             'before:from-primary/5 before:pointer-events-none before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-br before:to-transparent'
           )}
@@ -211,32 +211,33 @@ export default function ChatBot() {
           <CardHeader
             className={cn(
               'from-primary via-primary to-primary/90 text-primary-foreground relative bg-gradient-to-br',
-              'border-primary-foreground/10 rounded-t-xl border-b p-5',
-              'before:absolute before:inset-0 before:rounded-t-xl before:bg-gradient-to-r before:from-white/10 before:to-transparent'
+              'border-primary-foreground/10 rounded-t-xl border-b p-4',
+              'before:absolute before:inset-0 before:rounded-t-xl before:bg-gradient-to-r before:from-white/10 before:to-transparent',
+              'flex-shrink-0'
             )}
           >
             <div className='relative flex items-center justify-between'>
-              <div className='flex items-center gap-4'>
+              <div className='flex items-center gap-3'>
                 <div className='relative'>
-                  <Avatar className='border-primary-foreground/30 h-12 w-12 border-2 shadow-lg'>
+                  <Avatar className='border-primary-foreground/30 h-10 w-10 border-2 shadow-lg'>
                     <AvatarFallback className='bg-primary-foreground/20 text-primary-foreground backdrop-blur-sm'>
-                      <Bot size={22} className='animate-pulse' />
+                      <Bot size={20} className='animate-pulse' />
                     </AvatarFallback>
                   </Avatar>
                   {/* Online indicator */}
-                  <div className='border-primary-foreground absolute -right-1 -bottom-1 h-4 w-4 animate-pulse rounded-full border-2 bg-green-400 shadow-sm' />
+                  <div className='border-primary-foreground absolute -right-1 -bottom-1 h-3 w-3 animate-pulse rounded-full border-2 bg-green-400 shadow-sm' />
                 </div>
                 <div>
-                  <CardTitle className='flex items-center gap-2 text-xl font-bold tracking-tight'>
+                  <CardTitle className='flex items-center gap-2 text-lg font-bold tracking-tight'>
                     Sports Assistant
                     <Badge
                       variant='secondary'
-                      className='bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 px-2 py-0.5 text-xs'
+                      className='bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 px-1.5 py-0.5 text-xs'
                     >
                       AI
                     </Badge>
                   </CardTitle>
-                  <p className='text-sm font-medium opacity-90'>🏆 Always here to help you win!</p>
+                  <p className='text-xs font-medium opacity-90'>🏆 Always here to help!</p>
                 </div>
               </div>
               <Button
@@ -255,8 +256,8 @@ export default function ChatBot() {
           </CardHeader>
 
           {/* Messages Container */}
-          <ScrollArea className='flex-1 px-6'>
-            <CardContent className='space-y-6 p-0 py-6'>
+          <ScrollArea className='min-h-0 flex-1 px-4'>
+            <CardContent className='space-y-4 p-0 py-4'>
               {messages.map((message, index) => (
                 <div
                   key={index}
@@ -267,11 +268,11 @@ export default function ChatBot() {
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div
-                    className={cn('flex max-w-[90%] items-start gap-3', message.role === 'user' && 'flex-row-reverse')}
+                    className={cn('flex max-w-[85%] items-start gap-2', message.role === 'user' && 'flex-row-reverse')}
                   >
                     <Avatar
                       className={cn(
-                        'h-9 w-9 flex-shrink-0 shadow-md transition-transform hover:scale-110',
+                        'h-8 w-8 flex-shrink-0 shadow-md transition-transform hover:scale-110',
                         message.role === 'user' ? 'ring-primary/20 ring-2' : 'ring-muted/20 ring-2'
                       )}
                     >
@@ -283,13 +284,13 @@ export default function ChatBot() {
                             : 'from-muted to-muted/80 text-muted-foreground bg-gradient-to-br'
                         )}
                       >
-                        {message.role === 'user' ? <User size={18} /> : <Bot size={18} />}
+                        {message.role === 'user' ? <User size={16} /> : <Bot size={16} />}
                       </AvatarFallback>
                     </Avatar>
 
                     <div
                       className={cn(
-                        'group relative rounded-2xl border p-4 shadow-lg transition-all duration-300 hover:shadow-xl',
+                        'group relative rounded-2xl border p-3 shadow-lg transition-all duration-300 hover:shadow-xl',
                         message.role === 'user'
                           ? 'from-primary to-primary/90 text-primary-foreground border-primary/30 rounded-br-md bg-gradient-to-br'
                           : 'from-card to-card/80 text-card-foreground border-border/50 rounded-bl-md bg-gradient-to-br backdrop-blur-sm'
@@ -302,8 +303,8 @@ export default function ChatBot() {
 
                       {message.options && message.role === 'assistant' && (
                         <>
-                          <Separator className='my-4 opacity-30' />
-                          <div className='relative flex flex-col gap-2.5'>
+                          <Separator className='my-3 opacity-30' />
+                          <div className='relative flex flex-col gap-2'>
                             {message.options.map((option: string, optionIndex: number) => {
                               const isRedirectOption = Object.values(pageRedirects).some(
                                 (redirect) => redirect.label === option
@@ -316,7 +317,7 @@ export default function ChatBot() {
                                   size='sm'
                                   onClick={() => handleOptionClick(option)}
                                   className={cn(
-                                    'group/btn relative h-auto justify-between overflow-hidden p-3 text-left whitespace-normal',
+                                    'group/btn relative h-auto justify-between overflow-hidden p-2 text-left text-xs whitespace-normal',
                                     'transition-all duration-300 hover:scale-[1.02] hover:shadow-md',
                                     'before:absolute before:inset-0 before:translate-x-[-100%] before:bg-gradient-to-r before:from-transparent before:via-white/10 before:to-transparent before:transition-transform before:duration-700 hover:before:translate-x-[100%]',
                                     isRedirectOption &&
@@ -327,9 +328,9 @@ export default function ChatBot() {
                                   {isRedirectOption && (
                                     <Badge
                                       variant='secondary'
-                                      className='bg-primary/10 text-primary border-primary/30 relative ml-2 px-2 py-1 transition-transform group-hover/btn:scale-110'
+                                      className='bg-primary/10 text-primary border-primary/30 relative ml-1 px-1.5 py-0.5 transition-transform group-hover/btn:scale-110'
                                     >
-                                      <ExternalLink size={12} />
+                                      <ExternalLink size={10} />
                                     </Badge>
                                   )}
                                 </Button>
@@ -346,24 +347,24 @@ export default function ChatBot() {
               {/* Enhanced Typing Indicator */}
               {isTyping && (
                 <div className='animate-in slide-in-from-bottom-2 fade-in-0 flex justify-start duration-300'>
-                  <div className='flex max-w-[90%] items-start gap-3'>
-                    <Avatar className='ring-muted/20 h-9 w-9 flex-shrink-0 shadow-md ring-2'>
+                  <div className='flex max-w-[85%] items-start gap-2'>
+                    <Avatar className='ring-muted/20 h-8 w-8 flex-shrink-0 shadow-md ring-2'>
                       <AvatarFallback className='from-muted to-muted/80 text-muted-foreground bg-gradient-to-br'>
-                        <Bot size={18} className='animate-pulse' />
+                        <Bot size={16} className='animate-pulse' />
                       </AvatarFallback>
                     </Avatar>
-                    <div className='from-card to-card/80 text-card-foreground border-border/50 relative rounded-2xl rounded-bl-md border bg-gradient-to-br p-4 shadow-lg backdrop-blur-sm'>
+                    <div className='from-card to-card/80 text-card-foreground border-border/50 relative rounded-2xl rounded-bl-md border bg-gradient-to-br p-3 shadow-lg backdrop-blur-sm'>
                       <div className='flex space-x-1.5'>
                         <div
-                          className='bg-primary/60 h-2.5 w-2.5 animate-bounce rounded-full shadow-sm'
+                          className='bg-primary/60 h-2 w-2 animate-bounce rounded-full shadow-sm'
                           style={{ animationDelay: '0ms', animationDuration: '1.4s' }}
                         />
                         <div
-                          className='bg-primary/60 h-2.5 w-2.5 animate-bounce rounded-full shadow-sm'
+                          className='bg-primary/60 h-2 w-2 animate-bounce rounded-full shadow-sm'
                           style={{ animationDelay: '200ms', animationDuration: '1.4s' }}
                         />
                         <div
-                          className='bg-primary/60 h-2.5 w-2.5 animate-bounce rounded-full shadow-sm'
+                          className='bg-primary/60 h-2 w-2 animate-bounce rounded-full shadow-sm'
                           style={{ animationDelay: '400ms', animationDuration: '1.4s' }}
                         />
                       </div>
@@ -381,8 +382,8 @@ export default function ChatBot() {
           <div
             className={cn(
               'from-muted/40 via-muted/20 to-muted/40 relative bg-gradient-to-r backdrop-blur-xl',
-              'border-border/50 rounded-b-xl border-t p-5',
-              'flex items-center justify-between',
+              'border-border/50 rounded-b-xl border-t p-3',
+              'flex flex-shrink-0 items-center justify-between',
               'before:from-primary/5 before:absolute before:inset-0 before:rounded-b-xl before:bg-gradient-to-r before:to-transparent'
             )}
           >
@@ -408,7 +409,7 @@ export default function ChatBot() {
                 }, 100);
               }}
               className={cn(
-                'group relative h-8 overflow-hidden px-4 text-xs font-semibold',
+                'group relative h-7 overflow-hidden px-3 text-xs font-semibold',
                 'transition-all duration-300 hover:scale-105 hover:shadow-md',
                 'from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary bg-gradient-to-r'
               )}
