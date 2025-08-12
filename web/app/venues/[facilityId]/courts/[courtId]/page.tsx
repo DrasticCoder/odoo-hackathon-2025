@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Clock, IndianRupee } from 'lucide-react';
-import { format, addDays, isSameDay } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { OwnerService } from '@/services/owner.service';
 import type { Court } from '@/types/owner.types';
 import { toast } from 'sonner';
@@ -24,6 +24,7 @@ export default function CourtDetailsPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(addDays(new Date(), 1)); // Default to tomorrow
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  console.log(availableSlots);
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
   const { Razorpay } = useRazorpay();
@@ -63,13 +64,8 @@ export default function CourtDetailsPage() {
       if (!court || !selectedDate) return;
 
       try {
-        // For demo purposes, simulate some booked slots
-        // In a real app, you'd fetch from the API
-        const dateStr = format(selectedDate, 'yyyy-MM-dd');
-        const mockBookedSlots = ['11:00 - 12:00', '14:00 - 15:00']; // Demo booked slots
+        const mockBookedSlots = ['11:00 - 12:00', '14:00 - 15:00']; //
         setBookedSlots(mockBookedSlots);
-
-        // Set available slots (all slots minus booked ones)
         const available = timeSlots.filter((slot) => !mockBookedSlots.includes(slot));
         setAvailableSlots(available);
       } catch (error) {
