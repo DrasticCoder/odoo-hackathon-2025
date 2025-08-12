@@ -100,7 +100,7 @@ export default function OtpLoginPage() {
           router.push('/owner/dashboard');
           break;
         default:
-          router.push('/venues');
+          router.push('/user/dashboard');
           break;
       }
     }

@@ -26,7 +26,7 @@ const Page = () => {
           router.push('/owner/dashboard');
           break;
         case UserRole.USER:
-          router.push('/venues');
+          router.push('/user/dashboard');
           break;
         default:
           break;
