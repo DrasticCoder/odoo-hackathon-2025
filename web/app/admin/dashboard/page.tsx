@@ -59,38 +59,49 @@ export default function AdminDashboard() {
           </div>
 
           {/* Stats Grid (Live Analytics) */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="bg-primary text-primary-foreground shadow-xl">
+          <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
+            <Card className='bg-primary text-primary-foreground shadow-xl'>
               <CardHeader>
                 <CardTitle>Total Users</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-extrabold">{loading ? <span className="animate-pulse">...</span> : stats?.totalUsers}</div>
+                <div className='text-4xl font-extrabold'>
+                  {loading ? <span className='animate-pulse'>...</span> : stats?.totalUsers}
+                </div>
               </CardContent>
             </Card>
-            <Card className="bg-secondary text-secondary-foreground shadow-xl">
+            <Card className='bg-secondary text-secondary-foreground shadow-xl'>
               <CardHeader>
                 <CardTitle>Total Facilities</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-extrabold">{loading ? <span className="animate-pulse">...</span> : stats?.totalFacilities}</div>
+                <div className='text-4xl font-extrabold'>
+                  {loading ? <span className='animate-pulse'>...</span> : stats?.totalFacilities}
+                </div>
               </CardContent>
             </Card>
-            <Card className="bg-primary text-primary-foreground shadow-xl">
+            <Card className='bg-primary text-primary-foreground shadow-xl'>
               <CardHeader>
                 <CardTitle>Total Bookings</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-extrabold">{loading ? <span className="animate-pulse">...</span> : stats?.totalBookings}</div>
+                <div className='text-4xl font-extrabold'>
+                  {loading ? <span className='animate-pulse'>...</span> : stats?.totalBookings}
+                </div>
               </CardContent>
             </Card>
-            <Card className="bg-secondary text-secondary-foreground shadow-xl">
+            <Card className='bg-secondary text-secondary-foreground shadow-xl'>
               <CardHeader>
                 <CardTitle>Total Revenue</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-extrabold">₹{loading ? <span className="animate-pulse">...</span> : stats?.totalRevenue?.toLocaleString()}</div>
-                <div className="text-xs mt-2 text-secondary-foreground/80">Avg. Booking Value: ₹{stats?.averageBookingValue?.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                <div className='text-4xl font-extrabold'>
+                  ₹{loading ? <span className='animate-pulse'>...</span> : stats?.totalRevenue?.toLocaleString()}
+                </div>
+                <div className='text-secondary-foreground/80 mt-2 text-xs'>
+                  Avg. Booking Value: ₹
+                  {stats?.averageBookingValue?.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -133,9 +144,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <Button variant='outline' className='mt-4 w-full'>
-                 <Link href='/admin/Activity'>
-                  View All Activities
-                  </Link>
+                  <Link href='/admin/Activity'>View All Activities</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -168,10 +177,8 @@ export default function AdminDashboard() {
                     <Badge className='bg-blue-100 text-blue-700'>89 online</Badge>
                   </div>
                 </div>
-                <Button variant='outline' className='mt-4 w-full'>              
-                  <Link href='/admin/logs'>
-                  View System Logs
-                  </Link>
+                <Button variant='outline' className='mt-4 w-full'>
+                  <Link href='/admin/logs'>View System Logs</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -184,8 +191,10 @@ export default function AdminDashboard() {
                 <CardTitle>Analytics Overview</CardTitle>
                 <CardDescription>View booking trends, sports popularity and status distribution</CardDescription>
               </CardHeader>
-              <CardContent className='flex flex-col md:flex-row md:items-center md:justify-between gap-4'>
-                <div className='text-sm text-muted-foreground'>Detailed interactive charts now live in the dedicated analytics page.</div>
+              <CardContent className='flex flex-col gap-4 md:flex-row md:items-center md:justify-between'>
+                <div className='text-muted-foreground text-sm'>
+                  Detailed interactive charts now live in the dedicated analytics page.
+                </div>
                 <Button asChild>
                   <Link href='/admin/analytics'>Go to Analytics</Link>
                 </Button>
@@ -193,44 +202,52 @@ export default function AdminDashboard() {
             </Card>
           </div>
           {/* Admin Quick Links */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-8">
-            <Link href="/admin/facility-approval">
-              <Card className="hover:shadow-2xl transition-shadow cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2"><FileCheck2 className="h-5 w-5" /> Facility Approval</CardTitle>
+          <div className='mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+            <Link href='/admin/facility-approval'>
+              <Card className='cursor-pointer transition-shadow hover:shadow-2xl'>
+                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                  <CardTitle className='flex items-center gap-2 text-sm font-medium'>
+                    <FileCheck2 className='h-5 w-5' /> Facility Approval
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg font-bold">Approve or reject new facilities</div>
+                  <div className='text-lg font-bold'>Approve or reject new facilities</div>
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/admin/user-management">
-              <Card className="hover:shadow-2xl transition-shadow cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2"><Shield className="h-5 w-5" /> User Management</CardTitle>
+            <Link href='/admin/user-management'>
+              <Card className='cursor-pointer transition-shadow hover:shadow-2xl'>
+                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                  <CardTitle className='flex items-center gap-2 text-sm font-medium'>
+                    <Shield className='h-5 w-5' /> User Management
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg font-bold">Manage users and ban/unban</div>
+                  <div className='text-lg font-bold'>Manage users and ban/unban</div>
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/admin/reports-moderation">
-              <Card className="hover:shadow-2xl transition-shadow cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2"><FileWarning className="h-5 w-5" /> Reports Moderation</CardTitle>
+            <Link href='/admin/reports-moderation'>
+              <Card className='cursor-pointer transition-shadow hover:shadow-2xl'>
+                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                  <CardTitle className='flex items-center gap-2 text-sm font-medium'>
+                    <FileWarning className='h-5 w-5' /> Reports Moderation
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg font-bold">Moderate user and facility reports</div>
+                  <div className='text-lg font-bold'>Moderate user and facility reports</div>
                 </CardContent>
               </Card>
             </Link>
-            <Link href="/admin/user-ban-history">
-              <Card className="hover:shadow-2xl transition-shadow cursor-pointer">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2"><Ban className="h-5 w-5" /> User Ban History</CardTitle>
+            <Link href='/admin/user-ban-history'>
+              <Card className='cursor-pointer transition-shadow hover:shadow-2xl'>
+                <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                  <CardTitle className='flex items-center gap-2 text-sm font-medium'>
+                    <Ban className='h-5 w-5' /> User Ban History
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg font-bold">View all banned users</div>
+                  <div className='text-lg font-bold'>View all banned users</div>
                 </CardContent>
               </Card>
             </Link>

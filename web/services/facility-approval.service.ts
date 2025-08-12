@@ -13,7 +13,9 @@ export type FacilityApproval = {
 
 export class FacilityApprovalService {
   static async listPending() {
-    return await ApiClient.get<{ data: FacilityApproval[] }>(`/api/facilities`, { params: { status: 'PENDING_APPROVAL', include: 'owner,photos' } });
+    return await ApiClient.get<{ data: FacilityApproval[] }>(`/api/facilities`, {
+      params: { status: 'PENDING_APPROVAL', include: 'owner,photos' },
+    });
   }
   static async getById(id: string) {
     return await ApiClient.get<FacilityApproval>(`/api/facilities/${id}`, { params: { include: 'owner,photos' } });

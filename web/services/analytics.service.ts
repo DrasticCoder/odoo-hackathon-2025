@@ -17,14 +17,16 @@ export class AnalyticsService {
     const [users, facilities, bookings] = await Promise.all([
       ApiClient.get<{ meta: { total: number } }>(`/api/users`),
       ApiClient.get<{ meta: { total: number } }>(`/api/facilities`),
-      ApiClient.get<{ data: { 
-        totalBookings?: number;
-        totalRevenue?: number;
-        averageBookingValue?: number;
-        confirmedBookings?: number;
-        cancelledBookings?: number;
-        monthlyBookings?: { month: string; bookings: number }[];
-      } }>(`/api/bookings/stats`),
+      ApiClient.get<{
+        data: {
+          totalBookings?: number;
+          totalRevenue?: number;
+          averageBookingValue?: number;
+          confirmedBookings?: number;
+          cancelledBookings?: number;
+          monthlyBookings?: { month: string; bookings: number }[];
+        };
+      }>(`/api/bookings/stats`),
     ]);
     return {
       totalUsers: users.data?.meta?.total ?? 0,

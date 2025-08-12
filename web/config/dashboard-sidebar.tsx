@@ -11,10 +11,9 @@ import {
   Users,
   Shield,
   CalendarClock,
-  SettingsIcon, 
-   UsersIcon
+  SettingsIcon,
+  UsersIcon,
 } from 'lucide-react';
-
 
 interface AdminRoute {
   title: string;
@@ -51,43 +50,42 @@ export const userRoutes: AdminRoute[] = [
     link: '/user/profile',
     icon: UsersIcon,
   },
-
 ];
 
 export const ownerRoutes: AdminRoute[] = [
   {
-      icon: Home,
-      title: 'Dashboard',
-      link: '/owner/dashboard',
-    },
-    {
-      icon: Building2,
-      title: 'Facilities',
-      link: '/owner/facilities',
-    },
-    {
-      icon: Shield,
-      title: 'Courts',
-      link: '/owner/courts',
-    },
-    {
-      icon: Calendar,
-      title: 'Bookings',
-      link: '/owner/bookings',
-    },
-    {
-      icon: CalendarClock,
-      title: 'Time Slots',
-      link: '/owner/availability',
-    },
-    {
-      icon: BarChart3,
-      title: 'Analytics',
-      link: '/owner/analytics',
-    },
-    {
-      icon: Users,
-      title: 'Customers',
-      link: '/owner/customers',
-    },
+    icon: Home,
+    title: 'Dashboard',
+    link: '/owner/dashboard',
+  },
+  {
+    icon: Building2,
+    title: 'Facilities',
+    link: '/owner/facilities',
+  },
+  {
+    icon: Shield,
+    title: 'Courts',
+    link: '/owner/courts',
+  },
+  {
+    icon: Calendar,
+    title: 'Bookings',
+    link: '/owner/bookings',
+  },
+  {
+    icon: CalendarClock,
+    title: 'Time Slots',
+    link: '/owner/availability',
+  },
+  {
+    icon: BarChart3,
+    title: 'Analytics',
+    link: '/owner/analytics',
+  },
+  {
+    icon: Users,
+    title: 'Customers',
+    link: '/owner/customers',
+  },
 ];
