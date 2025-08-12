@@ -13,10 +13,10 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UserHeader from '@/components/UserHeader';
 import Footer from '@/components/Footer';
-import { 
-  MapPin, 
-  Star, 
-  Clock, 
+import {
+  MapPin,
+  Star,
+  Clock,
   Phone,
   Mail,
   Wifi,
@@ -29,7 +29,7 @@ import {
   ArrowLeft,
   Calendar,
   Shield,
-  Award
+  Award,
 } from 'lucide-react';
 
 // Mock venue data - in real app, this would come from API
@@ -37,8 +37,10 @@ const mockVenueDetails = {
   '1': {
     id: '1',
     name: 'SportZone Arena',
-    description: 'Premium badminton and tennis facility with professional courts and top-notch amenities. Our facility features international standard courts with proper lighting and ventilation systems.',
-    fullDescription: 'SportZone Arena is a state-of-the-art sports facility located in the heart of Koramangala. We pride ourselves on providing world-class infrastructure for badminton and tennis enthusiasts. Our facility includes 8 badminton courts and 4 tennis courts, all meeting international standards. We also offer professional coaching services and equipment rental.',
+    description:
+      'Premium badminton and tennis facility with professional courts and top-notch amenities. Our facility features international standard courts with proper lighting and ventilation systems.',
+    fullDescription:
+      'SportZone Arena is a state-of-the-art sports facility located in the heart of Koramangala. We pride ourselves on providing world-class infrastructure for badminton and tennis enthusiasts. Our facility includes 8 badminton courts and 4 tennis courts, all meeting international standards. We also offer professional coaching services and equipment rental.',
     location: 'Koramangala, Bangalore',
     shortLocation: 'Koramangala',
     city: 'Bangalore',
@@ -64,7 +66,7 @@ const mockVenueDetails = {
     featured: true,
     contact: {
       phone: '+91 9876543210',
-      email: 'info@sportzonearena.com'
+      email: 'info@sportzonearena.com',
     },
     courts: [
       { id: '1', name: 'Badminton Court 1', type: 'Badminton', price: 500 },
@@ -80,15 +82,15 @@ const mockVenueDetails = {
       'Professional coaching',
       'Locker facilities',
       'Refreshment area',
-      'Ample parking space'
+      'Ample parking space',
     ],
     policies: [
       'Advance booking required',
       'Cancellation allowed up to 2 hours before',
       'Non-slip sports shoes mandatory',
       'Outside food not allowed',
-      'Equipment rental at additional cost'
-    ]
+      'Equipment rental at additional cost',
+    ],
   },
   // Add more venue details as needed
 };
@@ -122,11 +124,11 @@ export default function VenueDetailPage() {
   if (!venue) {
     return (
       <AuthGuard requiredRole={UserRole.USER}>
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-2">Venue not found</h2>
-            <p className="text-muted-foreground mb-4">The venue you&apos;re looking for doesn&apos;t exist.</p>
-            <Link href="/venues">
+        <div className='bg-background flex min-h-screen items-center justify-center'>
+          <div className='text-center'>
+            <h2 className='mb-2 text-2xl font-bold'>Venue not found</h2>
+            <p className='text-muted-foreground mb-4'>The venue you&apos;re looking for doesn&apos;t exist.</p>
+            <Link href='/venues'>
               <Button>Back to Venues</Button>
             </Link>
           </div>
@@ -137,45 +139,45 @@ export default function VenueDetailPage() {
 
   return (
     <AuthGuard requiredRole={UserRole.USER}>
-      <div className="min-h-screen bg-background">
+      <div className='bg-background min-h-screen'>
         <UserHeader />
-        
-        <div className="container mx-auto px-4 py-6">
+
+        <div className='container mx-auto px-4 py-6'>
           {/* Back Button */}
-          <div className="mb-6">
-            <Link href="/venues">
-              <Button variant="ghost" className="pl-0">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+          <div className='mb-6'>
+            <Link href='/venues'>
+              <Button variant='ghost' className='pl-0'>
+                <ArrowLeft className='mr-2 h-4 w-4' />
                 Back to Venues
               </Button>
             </Link>
           </div>
 
           {/* Hero Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className='mb-8 grid grid-cols-1 gap-8 lg:grid-cols-2'>
             {/* Image Gallery */}
-            <div className="space-y-4">
-              <div className="relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
+            <div className='space-y-4'>
+              <div className='from-primary/10 to-secondary/10 relative aspect-video overflow-hidden rounded-xl bg-gradient-to-br'>
                 <Image
                   src={venue.images[activeImageIndex]}
                   alt={venue.name}
-                  className="w-full h-full object-cover"
+                  className='h-full w-full object-cover'
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     e.currentTarget.nextElementSibling!.classList.remove('hidden');
                   }}
                 />
-                <div className="hidden w-full h-full flex items-center justify-center text-8xl">🏟️</div>
-                
+                <div className='flex hidden h-full w-full items-center justify-center text-8xl'>🏟️</div>
+
                 {/* Image Navigation */}
                 {venue.images.length > 1 && (
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                  <div className='absolute bottom-4 left-1/2 flex -translate-x-1/2 transform gap-2'>
                     {venue.images.map((_, index) => (
                       <button
                         key={index}
                         onClick={() => setActiveImageIndex(index)}
-                        className={`w-2 h-2 rounded-full transition-all ${
-                          index === activeImageIndex ? 'bg-white w-6' : 'bg-white/50'
+                        className={`h-2 w-2 rounded-full transition-all ${
+                          index === activeImageIndex ? 'w-6 bg-white' : 'bg-white/50'
                         }`}
                       />
                     ))}
@@ -185,23 +187,25 @@ export default function VenueDetailPage() {
 
               {/* Thumbnail Images */}
               {venue.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-2">
+                <div className='grid grid-cols-4 gap-2'>
                   {venue.images.slice(1, 5).map((image, index) => (
                     <div
                       key={index}
-                      className="relative aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                      className='relative aspect-square cursor-pointer overflow-hidden rounded-lg transition-opacity hover:opacity-80'
                       onClick={() => setActiveImageIndex(index + 1)}
                     >
                       <Image
                         src={image}
                         alt={`${venue.name} ${index + 2}`}
-                        className="w-full h-full object-cover"
+                        className='h-full w-full object-cover'
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
                           e.currentTarget.nextElementSibling!.classList.remove('hidden');
                         }}
                       />
-                      <div className="hidden w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-2xl">🏟️</div>
+                      <div className='from-primary/20 to-secondary/20 flex hidden h-full w-full items-center justify-center bg-gradient-to-br text-2xl'>
+                        🏟️
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -209,63 +213,63 @@ export default function VenueDetailPage() {
             </div>
 
             {/* Venue Info */}
-            <div className="space-y-6">
+            <div className='space-y-6'>
               {/* Header */}
               <div>
-                <div className="flex items-start justify-between mb-4">
+                <div className='mb-4 flex items-start justify-between'>
                   <div>
-                    <h1 className="text-3xl font-bold text-foreground mb-2">{venue.name}</h1>
-                    <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                      <MapPin className="h-4 w-4" />
+                    <h1 className='text-foreground mb-2 text-3xl font-bold'>{venue.name}</h1>
+                    <div className='text-muted-foreground mb-2 flex items-center gap-2'>
+                      <MapPin className='h-4 w-4' />
                       <span>{venue.location}</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-primary">₹{venue.pricePerHour}</div>
-                    <div className="text-sm text-muted-foreground">per hour</div>
+                  <div className='text-right'>
+                    <div className='text-primary text-3xl font-bold'>₹{venue.pricePerHour}</div>
+                    <div className='text-muted-foreground text-sm'>per hour</div>
                   </div>
                 </div>
 
                 {/* Badges */}
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className='mb-4 flex flex-wrap gap-2'>
                   {venue.featured && (
-                    <Badge className="bg-yellow-500 hover:bg-yellow-600">
-                      <Award className="h-3 w-3 mr-1" />
+                    <Badge className='bg-yellow-500 hover:bg-yellow-600'>
+                      <Award className='mr-1 h-3 w-3' />
                       Featured
                     </Badge>
                   )}
                   {venue.verified && (
-                    <Badge className="bg-green-500 hover:bg-green-600">
-                      <Shield className="h-3 w-3 mr-1" />
+                    <Badge className='bg-green-500 hover:bg-green-600'>
+                      <Shield className='mr-1 h-3 w-3' />
                       Verified
                     </Badge>
                   )}
-                  <Badge variant="outline">{venue.environment}</Badge>
+                  <Badge variant='outline'>{venue.environment}</Badge>
                 </div>
 
                 {/* Rating */}
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    <span className="text-lg font-semibold">{venue.rating}</span>
-                    <span className="text-muted-foreground">({venue.reviews} reviews)</span>
+                <div className='mb-4 flex items-center gap-4'>
+                  <div className='flex items-center gap-1'>
+                    <Star className='h-5 w-5 fill-yellow-400 text-yellow-400' />
+                    <span className='text-lg font-semibold'>{venue.rating}</span>
+                    <span className='text-muted-foreground'>({venue.reviews} reviews)</span>
                   </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span className="text-sm">{venue.operatingHours}</span>
+                  <div className='text-muted-foreground flex items-center gap-2'>
+                    <Clock className='h-4 w-4' />
+                    <span className='text-sm'>{venue.operatingHours}</span>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-muted-foreground">{venue.description}</p>
+                <p className='text-muted-foreground'>{venue.description}</p>
               </div>
 
               {/* Sports */}
               <div>
-                <h3 className="font-semibold mb-2">Available Sports</h3>
-                <div className="flex flex-wrap gap-2">
+                <h3 className='mb-2 font-semibold'>Available Sports</h3>
+                <div className='flex flex-wrap gap-2'>
                   {venue.sportTypes.map((sport) => (
-                    <Badge key={sport} variant="secondary" className="text-sm px-3 py-1">
+                    <Badge key={sport} variant='secondary' className='px-3 py-1 text-sm'>
                       {sport}
                     </Badge>
                   ))}
@@ -274,14 +278,14 @@ export default function VenueDetailPage() {
 
               {/* Amenities */}
               <div>
-                <h3 className="font-semibold mb-2">Amenities</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <h3 className='mb-2 font-semibold'>Amenities</h3>
+                <div className='grid grid-cols-2 gap-3'>
                   {venue.amenities.map((amenity) => {
                     const IconComponent = getAmenityIcon(amenity);
                     return (
-                      <div key={amenity} className="flex items-center gap-2">
-                        <IconComponent className="h-4 w-4 text-primary" />
-                        <span className="text-sm">{amenity}</span>
+                      <div key={amenity} className='flex items-center gap-2'>
+                        <IconComponent className='text-primary h-4 w-4' />
+                        <span className='text-sm'>{amenity}</span>
                       </div>
                     );
                   })}
@@ -289,20 +293,20 @@ export default function VenueDetailPage() {
               </div>
 
               {/* Contact & Book Button */}
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Phone className="h-4 w-4" />
+              <div className='space-y-4'>
+                <div className='flex gap-4'>
+                  <div className='text-muted-foreground flex items-center gap-2 text-sm'>
+                    <Phone className='h-4 w-4' />
                     <span>{venue.contact.phone}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Mail className="h-4 w-4" />
+                  <div className='text-muted-foreground flex items-center gap-2 text-sm'>
+                    <Mail className='h-4 w-4' />
                     <span>{venue.contact.email}</span>
                   </div>
                 </div>
-                
-                <Button size="lg" className="w-full">
-                  <Calendar className="h-4 w-4 mr-2" />
+
+                <Button size='lg' className='w-full'>
+                  <Calendar className='mr-2 h-4 w-4' />
                   Book Now
                 </Button>
               </div>
@@ -310,33 +314,35 @@ export default function VenueDetailPage() {
           </div>
 
           {/* Detailed Information Tabs */}
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="courts">Courts</TabsTrigger>
-              <TabsTrigger value="facilities">Facilities</TabsTrigger>
-              <TabsTrigger value="policies">Policies</TabsTrigger>
+          <Tabs defaultValue='overview' className='w-full'>
+            <TabsList className='grid w-full grid-cols-4'>
+              <TabsTrigger value='overview'>Overview</TabsTrigger>
+              <TabsTrigger value='courts'>Courts</TabsTrigger>
+              <TabsTrigger value='facilities'>Facilities</TabsTrigger>
+              <TabsTrigger value='policies'>Policies</TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="overview" className="mt-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <TabsContent value='overview' className='mt-6'>
+              <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
                 <Card>
                   <CardHeader>
                     <CardTitle>About This Venue</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground mb-4">{venue.fullDescription}</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Environment:</span>
+                    <p className='text-muted-foreground mb-4'>{venue.fullDescription}</p>
+                    <div className='space-y-2'>
+                      <div className='flex justify-between'>
+                        <span className='text-muted-foreground'>Environment:</span>
                         <span>{venue.environment}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Price Range:</span>
-                        <span>₹{venue.priceMin} - ₹{venue.priceMax}/hr</span>
+                      <div className='flex justify-between'>
+                        <span className='text-muted-foreground'>Price Range:</span>
+                        <span>
+                          ₹{venue.priceMin} - ₹{venue.priceMax}/hr
+                        </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Operating Hours:</span>
+                      <div className='flex justify-between'>
+                        <span className='text-muted-foreground'>Operating Hours:</span>
                         <span>{venue.operatingHours}</span>
                       </div>
                     </div>
@@ -348,26 +354,26 @@ export default function VenueDetailPage() {
                     <CardTitle>Location & Contact</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
+                    <div className='space-y-3'>
                       <div>
-                        <div className="flex items-start gap-2">
-                          <MapPin className="h-4 w-4 mt-1 text-primary" />
+                        <div className='flex items-start gap-2'>
+                          <MapPin className='text-primary mt-1 h-4 w-4' />
                           <div>
-                            <div className="font-medium">{venue.address}</div>
-                            <div className="text-sm text-muted-foreground">{venue.city}</div>
+                            <div className='font-medium'>{venue.address}</div>
+                            <div className='text-muted-foreground text-sm'>{venue.city}</div>
                           </div>
                         </div>
                       </div>
-                      
+
                       <Separator />
-                      
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-primary" />
+
+                      <div className='space-y-2'>
+                        <div className='flex items-center gap-2'>
+                          <Phone className='text-primary h-4 w-4' />
                           <span>{venue.contact.phone}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-primary" />
+                        <div className='flex items-center gap-2'>
+                          <Mail className='text-primary h-4 w-4' />
                           <span>{venue.contact.email}</span>
                         </div>
                       </div>
@@ -376,18 +382,18 @@ export default function VenueDetailPage() {
                 </Card>
               </div>
             </TabsContent>
-            
-            <TabsContent value="courts" className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <TabsContent value='courts' className='mt-6'>
+              <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                 {venue.courts.map((court) => (
                   <Card key={court.id}>
                     <CardHeader>
-                      <CardTitle className="text-lg">{court.name}</CardTitle>
+                      <CardTitle className='text-lg'>{court.name}</CardTitle>
                       <CardDescription>{court.type}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center justify-between">
-                        <span className="text-2xl font-bold text-primary">₹{court.price}/hr</span>
+                      <div className='flex items-center justify-between'>
+                        <span className='text-primary text-2xl font-bold'>₹{court.price}/hr</span>
                         <Button>Book This Court</Button>
                       </div>
                     </CardContent>
@@ -395,17 +401,17 @@ export default function VenueDetailPage() {
                 ))}
               </div>
             </TabsContent>
-            
-            <TabsContent value="facilities" className="mt-6">
+
+            <TabsContent value='facilities' className='mt-6'>
               <Card>
                 <CardHeader>
                   <CardTitle>Available Facilities</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
                     {venue.facilities.map((facility, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-primary rounded-full" />
+                      <div key={index} className='flex items-center gap-3'>
+                        <div className='bg-primary h-2 w-2 rounded-full' />
                         <span>{facility}</span>
                       </div>
                     ))}
@@ -413,18 +419,18 @@ export default function VenueDetailPage() {
                 </CardContent>
               </Card>
             </TabsContent>
-            
-            <TabsContent value="policies" className="mt-6">
+
+            <TabsContent value='policies' className='mt-6'>
               <Card>
                 <CardHeader>
                   <CardTitle>Venue Policies</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
+                  <div className='space-y-3'>
                     {venue.policies.map((policy, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <div className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2" />
-                        <span className="text-muted-foreground">{policy}</span>
+                      <div key={index} className='flex items-start gap-3'>
+                        <div className='bg-muted-foreground mt-2 h-1.5 w-1.5 rounded-full' />
+                        <span className='text-muted-foreground'>{policy}</span>
                       </div>
                     ))}
                   </div>

@@ -15,12 +15,12 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Checkbox } from '@/components/ui/checkbox';
 import UserHeader from '@/components/UserHeader';
 import Footer from '@/components/Footer';
-import { 
-  MapPin, 
-  Star, 
-  Search, 
-  SlidersHorizontal, 
-  Grid3X3, 
+import {
+  MapPin,
+  Star,
+  Search,
+  SlidersHorizontal,
+  Grid3X3,
   List,
   X,
   Clock,
@@ -30,7 +30,7 @@ import {
   Dumbbell,
   ShowerHead,
   AirVent,
-  Users
+  Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useLocationStore } from '@/store/location.store';
@@ -220,28 +220,18 @@ const mockVenues = [
 const SPORTS_OPTIONS = [
   'All Sports',
   'Badminton',
-  'Tennis', 
+  'Tennis',
   'Basketball',
   'Football',
   'Cricket',
   'Table Tennis',
   'Squash',
-  'Volleyball'
+  'Volleyball',
 ];
 
-const LOCATION_OPTIONS = [
-  'All Locations',
-  'Bangalore',
-  'Mumbai',
-  'Delhi',
-  'Pune'
-];
+const LOCATION_OPTIONS = ['All Locations', 'Bangalore', 'Mumbai', 'Delhi', 'Pune'];
 
-const ENVIRONMENT_OPTIONS = [
-  'All',
-  'Indoor',
-  'Outdoor'
-];
+const ENVIRONMENT_OPTIONS = ['All', 'Indoor', 'Outdoor'];
 
 const AMENITIES_OPTIONS = [
   { id: 'parking', label: 'Parking', icon: Car },
@@ -281,7 +271,7 @@ export default function VenuesPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
-  
+
   const [filters, setFilters] = useState<VenueFilters>({
     search: '',
     location: selectedLocation || 'All Locations',
@@ -295,9 +285,9 @@ export default function VenuesPage() {
 
   // Handle filter changes
   const updateFilter = (key: keyof VenueFilters, value: unknown) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
     setCurrentPage(1); // Reset to first page when filters change
   };
@@ -317,22 +307,25 @@ export default function VenuesPage() {
   };
 
   const toggleAmenity = (amenityId: string) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       amenities: prev.amenities.includes(amenityId)
-        ? prev.amenities.filter(id => id !== amenityId)
-        : [...prev.amenities, amenityId]
+        ? prev.amenities.filter((id) => id !== amenityId)
+        : [...prev.amenities, amenityId],
     }));
     setCurrentPage(1);
   };
 
   // Filter and sort venues
   const filteredVenues = useMemo(() => {
-    const filtered = mockVenues.filter(venue => {
+    const filtered = mockVenues.filter((venue) => {
       // Search filter
-      if (filters.search && !venue.name.toLowerCase().includes(filters.search.toLowerCase()) &&
-          !venue.description.toLowerCase().includes(filters.search.toLowerCase()) &&
-          !venue.location.toLowerCase().includes(filters.search.toLowerCase())) {
+      if (
+        filters.search &&
+        !venue.name.toLowerCase().includes(filters.search.toLowerCase()) &&
+        !venue.description.toLowerCase().includes(filters.search.toLowerCase()) &&
+        !venue.location.toLowerCase().includes(filters.search.toLowerCase())
+      ) {
         return false;
       }
 
@@ -363,11 +356,13 @@ export default function VenuesPage() {
 
       // Amenities filter
       if (filters.amenities.length > 0) {
-        const hasAllAmenities = filters.amenities.every(amenity => {
-          return venue.amenities.some(venueAmenity => 
-            venueAmenity.toLowerCase().includes(amenity.toLowerCase()) ||
-            amenity === 'ac' && venueAmenity.toLowerCase().includes('air') ||
-            amenity === 'cafe' && (venueAmenity.toLowerCase().includes('cafe') || venueAmenity.toLowerCase().includes('cafeteria'))
+        const hasAllAmenities = filters.amenities.every((amenity) => {
+          return venue.amenities.some(
+            (venueAmenity) =>
+              venueAmenity.toLowerCase().includes(amenity.toLowerCase()) ||
+              (amenity === 'ac' && venueAmenity.toLowerCase().includes('air')) ||
+              (amenity === 'cafe' &&
+                (venueAmenity.toLowerCase().includes('cafe') || venueAmenity.toLowerCase().includes('cafeteria')))
           );
         });
         if (!hasAllAmenities) return false;
@@ -407,27 +402,26 @@ export default function VenuesPage() {
 
   // Pagination
   const totalPages = Math.ceil(filteredVenues.length / ITEMS_PER_PAGE);
-  const paginatedVenues = filteredVenues.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const paginatedVenues = filteredVenues.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   // Filter sidebar component
-  const FilterSidebar = ({ className = "" }: { className?: string }) => (
-    <div className={cn("space-y-6", className)}>
+  const FilterSidebar = ({ className = '' }: { className?: string }) => (
+    <div className={cn('space-y-6', className)}>
       <div>
-        <h3 className="text-lg font-semibold mb-4">Filters</h3>
-        
+        <h3 className='mb-4 text-lg font-semibold'>Filters</h3>
+
         {/* Location Filter */}
-        <div className="space-y-3">
-          <label className="text-sm font-medium">Location</label>
+        <div className='space-y-3'>
+          <label className='text-sm font-medium'>Location</label>
           <Select value={filters.location} onValueChange={(value) => updateFilter('location', value)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {LOCATION_OPTIONS.map(location => (
-                <SelectItem key={location} value={location}>{location}</SelectItem>
+              {LOCATION_OPTIONS.map((location) => (
+                <SelectItem key={location} value={location}>
+                  {location}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -436,15 +430,17 @@ export default function VenuesPage() {
         <Separator />
 
         {/* Sport Filter */}
-        <div className="space-y-3">
-          <label className="text-sm font-medium">Sport Type</label>
+        <div className='space-y-3'>
+          <label className='text-sm font-medium'>Sport Type</label>
           <Select value={filters.sport} onValueChange={(value) => updateFilter('sport', value)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {SPORTS_OPTIONS.map(sport => (
-                <SelectItem key={sport} value={sport}>{sport}</SelectItem>
+              {SPORTS_OPTIONS.map((sport) => (
+                <SelectItem key={sport} value={sport}>
+                  {sport}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -453,15 +449,17 @@ export default function VenuesPage() {
         <Separator />
 
         {/* Environment Filter */}
-        <div className="space-y-3">
-          <label className="text-sm font-medium">Environment</label>
+        <div className='space-y-3'>
+          <label className='text-sm font-medium'>Environment</label>
           <Select value={filters.environment} onValueChange={(value) => updateFilter('environment', value)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {ENVIRONMENT_OPTIONS.map(env => (
-                <SelectItem key={env} value={env}>{env}</SelectItem>
+              {ENVIRONMENT_OPTIONS.map((env) => (
+                <SelectItem key={env} value={env}>
+                  {env}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -470,8 +468,8 @@ export default function VenuesPage() {
         <Separator />
 
         {/* Price Range */}
-        <div className="space-y-3">
-          <label className="text-sm font-medium">
+        <div className='space-y-3'>
+          <label className='text-sm font-medium'>
             Price Range: ₹{filters.priceRange[0]} - ₹{filters.priceRange[1]}/hr
           </label>
           <Slider
@@ -480,25 +478,25 @@ export default function VenuesPage() {
             max={2000}
             min={0}
             step={50}
-            className="w-full"
+            className='w-full'
           />
         </div>
 
         <Separator />
 
         {/* Rating Filter */}
-        <div className="space-y-3">
-          <label className="text-sm font-medium">Minimum Rating</label>
-          <div className="flex gap-2">
-            {[0, 3, 4, 4.5].map(rating => (
+        <div className='space-y-3'>
+          <label className='text-sm font-medium'>Minimum Rating</label>
+          <div className='flex gap-2'>
+            {[0, 3, 4, 4.5].map((rating) => (
               <Button
                 key={rating}
-                variant={filters.rating === rating ? "default" : "outline"}
-                size="sm"
+                variant={filters.rating === rating ? 'default' : 'outline'}
+                size='sm'
                 onClick={() => updateFilter('rating', rating)}
-                className="flex items-center gap-1"
+                className='flex items-center gap-1'
               >
-                <Star className="h-3 w-3" />
+                <Star className='h-3 w-3' />
                 {rating === 0 ? 'Any' : `${rating}+`}
               </Button>
             ))}
@@ -508,23 +506,20 @@ export default function VenuesPage() {
         <Separator />
 
         {/* Amenities */}
-        <div className="space-y-3">
-          <label className="text-sm font-medium">Amenities</label>
-          <div className="space-y-2">
-            {AMENITIES_OPTIONS.map(amenity => {
+        <div className='space-y-3'>
+          <label className='text-sm font-medium'>Amenities</label>
+          <div className='space-y-2'>
+            {AMENITIES_OPTIONS.map((amenity) => {
               const IconComponent = amenity.icon;
               return (
-                <div key={amenity.id} className="flex items-center space-x-2">
+                <div key={amenity.id} className='flex items-center space-x-2'>
                   <Checkbox
                     id={amenity.id}
                     checked={filters.amenities.includes(amenity.id)}
                     onCheckedChange={() => toggleAmenity(amenity.id)}
                   />
-                  <label
-                    htmlFor={amenity.id}
-                    className="text-sm flex items-center gap-2 cursor-pointer"
-                  >
-                    <IconComponent className="h-3 w-3" />
+                  <label htmlFor={amenity.id} className='flex cursor-pointer items-center gap-2 text-sm'>
+                    <IconComponent className='h-3 w-3' />
                     {amenity.label}
                   </label>
                 </div>
@@ -536,11 +531,7 @@ export default function VenuesPage() {
         <Separator />
 
         {/* Clear Filters */}
-        <Button 
-          variant="outline" 
-          onClick={clearAllFilters}
-          className="w-full"
-        >
+        <Button variant='outline' onClick={clearAllFilters} className='w-full'>
           Clear All Filters
         </Button>
       </div>
@@ -548,124 +539,114 @@ export default function VenuesPage() {
   );
 
   // Venue Card Component
-  const VenueCard = ({ venue, isListView = false }: { venue: typeof mockVenues[0], isListView?: boolean }) => (
+  const VenueCard = ({ venue, isListView = false }: { venue: (typeof mockVenues)[0]; isListView?: boolean }) => (
     <Link href={`/venues/${venue.id}`}>
-      <Card className={cn(
-        "overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer group",
-        isListView ? "flex flex-row h-48" : ""
-      )}>
-        <div className={cn(
-          "relative bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center",
-          isListView ? "w-48 flex-shrink-0" : "aspect-video"
-        )}>
+      <Card
+        className={cn(
+          'group cursor-pointer overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl',
+          isListView ? 'flex h-48 flex-row' : ''
+        )}
+      >
+        <div
+          className={cn(
+            'from-primary/10 to-secondary/10 relative flex items-center justify-center bg-gradient-to-br',
+            isListView ? 'w-48 flex-shrink-0' : 'aspect-video'
+          )}
+        >
           <Image
-            src={venue.image} 
+            src={venue.image}
             alt={venue.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
             onError={(e) => {
               e.currentTarget.style.display = 'none';
               e.currentTarget.nextElementSibling!.classList.remove('hidden');
             }}
           />
-          <div className="hidden text-6xl">🏟️</div>
-          
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-          
+          <div className='hidden text-6xl'>🏟️</div>
+
+          <div className='absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent' />
+
           {/* Badges */}
-          <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-            {venue.featured && (
-              <Badge className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs">
-                Featured
-              </Badge>
-            )}
-            {venue.verified && (
-              <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs">
-                Verified
-              </Badge>
-            )}
+          <div className='absolute top-3 left-3 flex flex-wrap gap-1'>
+            {venue.featured && <Badge className='bg-yellow-500 text-xs text-white hover:bg-yellow-600'>Featured</Badge>}
+            {venue.verified && <Badge className='bg-green-500 text-xs text-white hover:bg-green-600'>Verified</Badge>}
           </div>
-          
-          <div className="absolute top-3 right-3">
-            <Badge variant="secondary" className="bg-white/95 backdrop-blur-sm font-semibold">
+
+          <div className='absolute top-3 right-3'>
+            <Badge variant='secondary' className='bg-white/95 font-semibold backdrop-blur-sm'>
               ₹{venue.pricePerHour}/hr
             </Badge>
           </div>
 
-          <div className="absolute bottom-3 left-3 text-white">
-            <Badge variant="outline" className="border-white/50 text-white text-xs">
+          <div className='absolute bottom-3 left-3 text-white'>
+            <Badge variant='outline' className='border-white/50 text-xs text-white'>
               {venue.environment}
             </Badge>
           </div>
         </div>
 
-        <div className="flex-1">
-          <CardHeader className={isListView ? "pb-2" : ""}>
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <CardTitle className={cn(
-                  "group-hover:text-primary transition-colors",
-                  isListView ? "text-lg" : "text-xl"
-                )}>
+        <div className='flex-1'>
+          <CardHeader className={isListView ? 'pb-2' : ''}>
+            <div className='flex items-start justify-between'>
+              <div className='flex-1'>
+                <CardTitle
+                  className={cn('group-hover:text-primary transition-colors', isListView ? 'text-lg' : 'text-xl')}
+                >
                   {venue.name}
                 </CardTitle>
-                <CardDescription className="mt-1 flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
+                <CardDescription className='mt-1 flex items-center gap-1'>
+                  <MapPin className='h-3 w-3' />
                   {venue.shortLocation}
                 </CardDescription>
               </div>
-              <div className="flex items-center gap-1 ml-2">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-semibold">{venue.rating}</span>
-                <span className="text-xs text-muted-foreground">({venue.reviews})</span>
+              <div className='ml-2 flex items-center gap-1'>
+                <Star className='h-4 w-4 fill-yellow-400 text-yellow-400' />
+                <span className='text-sm font-semibold'>{venue.rating}</span>
+                <span className='text-muted-foreground text-xs'>({venue.reviews})</span>
               </div>
             </div>
           </CardHeader>
 
-          <CardContent className={isListView ? "pt-0" : ""}>
-            <p className={cn(
-              "text-muted-foreground mb-3",
-              isListView ? "text-sm line-clamp-2" : "text-sm"
-            )}>
+          <CardContent className={isListView ? 'pt-0' : ''}>
+            <p className={cn('text-muted-foreground mb-3', isListView ? 'line-clamp-2 text-sm' : 'text-sm')}>
               {venue.description}
             </p>
 
             {/* Sport Types */}
-            <div className="mb-3 flex flex-wrap gap-1">
+            <div className='mb-3 flex flex-wrap gap-1'>
               {venue.sportTypes.slice(0, isListView ? 2 : 3).map((sport) => (
-                <Badge key={sport} variant="outline" className="text-xs">
+                <Badge key={sport} variant='outline' className='text-xs'>
                   {sport}
                 </Badge>
               ))}
               {venue.sportTypes.length > (isListView ? 2 : 3) && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant='secondary' className='text-xs'>
                   +{venue.sportTypes.length - (isListView ? 2 : 3)} more
                 </Badge>
               )}
             </div>
 
             {/* Amenities */}
-            <div className="mb-4 flex flex-wrap gap-1">
+            <div className='mb-4 flex flex-wrap gap-1'>
               {venue.amenities.slice(0, isListView ? 3 : 4).map((amenity) => (
-                <Badge key={amenity} variant="secondary" className="text-xs bg-muted">
+                <Badge key={amenity} variant='secondary' className='bg-muted text-xs'>
                   {amenity}
                 </Badge>
               ))}
               {venue.amenities.length > (isListView ? 3 : 4) && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant='outline' className='text-xs'>
                   +{venue.amenities.length - (isListView ? 3 : 4)}
                 </Badge>
               )}
             </div>
 
             {/* Operating Hours */}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-              <Clock className="h-3 w-3" />
+            <div className='text-muted-foreground mb-3 flex items-center gap-2 text-xs'>
+              <Clock className='h-3 w-3' />
               {venue.operatingHours}
             </div>
 
-            <Button className="w-full group-hover:bg-primary/90 transition-colors">
-              View Details & Book
-            </Button>
+            <Button className='group-hover:bg-primary/90 w-full transition-colors'>View Details & Book</Button>
           </CardContent>
         </div>
       </Card>
@@ -674,62 +655,66 @@ export default function VenuesPage() {
 
   return (
     <AuthGuard requiredRole={UserRole.USER}>
-      <div className="min-h-screen bg-background">
+      <div className='bg-background min-h-screen'>
         <UserHeader />
-        
-        <div className="container mx-auto px-4 py-6">
+
+        <div className='container mx-auto px-4 py-6'>
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Sports Venues</h1>
-            <p className="text-muted-foreground">
-              Discover and book the best sports facilities in your area
-            </p>
+          <div className='mb-8'>
+            <h1 className='text-foreground mb-2 text-3xl font-bold'>Sports Venues</h1>
+            <p className='text-muted-foreground'>Discover and book the best sports facilities in your area</p>
           </div>
 
-          <div className="flex gap-6">
+          <div className='flex gap-6'>
             {/* Desktop Sidebar */}
-            <div className="hidden lg:block w-72 flex-shrink-0">
-              <div className="sticky top-6 bg-card rounded-lg border p-6 shadow-sm">
+            <div className='hidden w-72 flex-shrink-0 lg:block'>
+              <div className='bg-card sticky top-6 rounded-lg border p-6 shadow-sm'>
                 <FilterSidebar />
               </div>
             </div>
 
             {/* Main Content */}
-            <div className="flex-1">
+            <div className='flex-1'>
               {/* Search and Controls Bar */}
-              <div className="mb-6 space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
+              <div className='mb-6 space-y-4'>
+                <div className='flex flex-col gap-4 sm:flex-row'>
+                  <div className='relative flex-1'>
+                    <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform' />
                     <Input
-                      placeholder="Search venues, sports, or locations..."
-                      className="pl-10"
+                      placeholder='Search venues, sports, or locations...'
+                      className='pl-10'
                       value={filters.search}
                       onChange={(e) => updateFilter('search', e.target.value)}
                     />
                   </div>
-                  
+
                   {/* Mobile Filter Button */}
                   <Sheet open={isMobileFilterOpen} onOpenChange={setIsMobileFilterOpen}>
                     <SheetTrigger asChild>
-                      <Button variant="outline" className="lg:hidden flex items-center gap-2">
-                        <SlidersHorizontal className="h-4 w-4" />
+                      <Button variant='outline' className='flex items-center gap-2 lg:hidden'>
+                        <SlidersHorizontal className='h-4 w-4' />
                         Filters
-                        {(filters.amenities.length > 0 || filters.sport !== 'All Sports' || filters.location !== 'All Locations') && (
-                          <Badge variant="secondary" className="ml-1">
-                            {[...filters.amenities, ...(filters.sport !== 'All Sports' ? [1] : []), ...(filters.location !== 'All Locations' ? [1] : [])].length}
+                        {(filters.amenities.length > 0 ||
+                          filters.sport !== 'All Sports' ||
+                          filters.location !== 'All Locations') && (
+                          <Badge variant='secondary' className='ml-1'>
+                            {
+                              [
+                                ...filters.amenities,
+                                ...(filters.sport !== 'All Sports' ? [1] : []),
+                                ...(filters.location !== 'All Locations' ? [1] : []),
+                              ].length
+                            }
                           </Badge>
                         )}
                       </Button>
                     </SheetTrigger>
-                    <SheetContent side="left" className="w-80 overflow-y-auto">
+                    <SheetContent side='left' className='w-80 overflow-y-auto'>
                       <SheetHeader>
                         <SheetTitle>Filter Venues</SheetTitle>
-                        <SheetDescription>
-                          Narrow down your search to find the perfect venue
-                        </SheetDescription>
+                        <SheetDescription>Narrow down your search to find the perfect venue</SheetDescription>
                       </SheetHeader>
-                      <div className="mt-6">
+                      <div className='mt-6'>
                         <FilterSidebar />
                       </div>
                     </SheetContent>
@@ -737,14 +722,14 @@ export default function VenuesPage() {
                 </div>
 
                 {/* Sort and View Controls */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center gap-4'>
                     <Select value={filters.sort} onValueChange={(value) => updateFilter('sort', value)}>
-                      <SelectTrigger className="w-48">
+                      <SelectTrigger className='w-48'>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {SORT_OPTIONS.map(option => (
+                        {SORT_OPTIONS.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>
@@ -752,78 +737,73 @@ export default function VenuesPage() {
                       </SelectContent>
                     </Select>
 
-                    <div className="text-sm text-muted-foreground">
+                    <div className='text-muted-foreground text-sm'>
                       {filteredVenues.length} venue{filteredVenues.length !== 1 ? 's' : ''} found
                     </div>
                   </div>
 
                   {/* View Mode Toggle */}
-                  <div className="hidden sm:flex items-center border rounded-lg p-1">
+                  <div className='hidden items-center rounded-lg border p-1 sm:flex'>
                     <Button
                       variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                      size="sm"
+                      size='sm'
                       onClick={() => setViewMode('grid')}
-                      className="h-8 w-8 p-0"
+                      className='h-8 w-8 p-0'
                     >
-                      <Grid3X3 className="h-4 w-4" />
+                      <Grid3X3 className='h-4 w-4' />
                     </Button>
                     <Button
                       variant={viewMode === 'list' ? 'default' : 'ghost'}
-                      size="sm"
+                      size='sm'
                       onClick={() => setViewMode('list')}
-                      className="h-8 w-8 p-0"
+                      className='h-8 w-8 p-0'
                     >
-                      <List className="h-4 w-4" />
+                      <List className='h-4 w-4' />
                     </Button>
                   </div>
                 </div>
 
                 {/* Active Filters Display */}
-                {(filters.amenities.length > 0 || filters.sport !== 'All Sports' || filters.location !== 'All Locations' || filters.environment !== 'All' || filters.rating > 0) && (
-                  <div className="flex flex-wrap gap-2">
+                {(filters.amenities.length > 0 ||
+                  filters.sport !== 'All Sports' ||
+                  filters.location !== 'All Locations' ||
+                  filters.environment !== 'All' ||
+                  filters.rating > 0) && (
+                  <div className='flex flex-wrap gap-2'>
                     {filters.sport !== 'All Sports' && (
-                      <Badge variant="secondary" className="px-2 py-1">
+                      <Badge variant='secondary' className='px-2 py-1'>
                         {filters.sport}
-                        <X 
-                          className="h-3 w-3 ml-1 cursor-pointer" 
+                        <X
+                          className='ml-1 h-3 w-3 cursor-pointer'
                           onClick={() => updateFilter('sport', 'All Sports')}
                         />
                       </Badge>
                     )}
                     {filters.location !== 'All Locations' && (
-                      <Badge variant="secondary" className="px-2 py-1">
+                      <Badge variant='secondary' className='px-2 py-1'>
                         {filters.location}
-                        <X 
-                          className="h-3 w-3 ml-1 cursor-pointer" 
+                        <X
+                          className='ml-1 h-3 w-3 cursor-pointer'
                           onClick={() => updateFilter('location', 'All Locations')}
                         />
                       </Badge>
                     )}
                     {filters.environment !== 'All' && (
-                      <Badge variant="secondary" className="px-2 py-1">
+                      <Badge variant='secondary' className='px-2 py-1'>
                         {filters.environment}
-                        <X 
-                          className="h-3 w-3 ml-1 cursor-pointer" 
-                          onClick={() => updateFilter('environment', 'All')}
-                        />
+                        <X className='ml-1 h-3 w-3 cursor-pointer' onClick={() => updateFilter('environment', 'All')} />
                       </Badge>
                     )}
                     {filters.rating > 0 && (
-                      <Badge variant="secondary" className="px-2 py-1">
+                      <Badge variant='secondary' className='px-2 py-1'>
                         {filters.rating}+ rating
-                        <X 
-                          className="h-3 w-3 ml-1 cursor-pointer" 
-                          onClick={() => updateFilter('rating', 0)}
-                        />
+                        <X className='ml-1 h-3 w-3 cursor-pointer' onClick={() => updateFilter('rating', 0)} />
                       </Badge>
                     )}
-                    {filters.amenities.map(amenity => (
-                      <Badge key={amenity} variant="secondary" className="px-2 py-1">
-                        {AMENITIES_OPTIONS.find(a => a.id === amenity)?.label}
-                        <X 
-                          className="h-3 w-3 ml-1 cursor-pointer" 
-                          onClick={() => toggleAmenity(amenity)}
-                        />
+                    {filters.amenities.map((amenity) => (
+                      <Badge key={amenity} variant='secondary' className='px-2 py-1'>
+                        {AMENITIES_OPTIONS.find((a) => a.id === amenity)?.label}
+                        <X className='ml-1 h-3 w-3 cursor-pointer' onClick={() => toggleAmenity(amenity)} />
                       </Badge>
                     ))}
                   </div>
@@ -832,70 +812,59 @@ export default function VenuesPage() {
 
               {/* Results */}
               {filteredVenues.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">🏟️</div>
-                  <h3 className="text-lg font-semibold mb-2">No venues found</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Try adjusting your filters or search terms
-                  </p>
+                <div className='py-12 text-center'>
+                  <div className='mb-4 text-6xl'>🏟️</div>
+                  <h3 className='mb-2 text-lg font-semibold'>No venues found</h3>
+                  <p className='text-muted-foreground mb-4'>Try adjusting your filters or search terms</p>
                   <Button onClick={clearAllFilters}>Clear All Filters</Button>
                 </div>
               ) : (
                 <>
                   {/* Venues Grid/List */}
-                  <div className={cn(
-                    "gap-6 mb-8",
-                    viewMode === 'grid' 
-                      ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3" 
-                      : "space-y-6"
-                  )}>
+                  <div
+                    className={cn(
+                      'mb-8 gap-6',
+                      viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'space-y-6'
+                    )}
+                  >
                     {paginatedVenues.map((venue) => (
-                      <VenueCard 
-                        key={venue.id} 
-                        venue={venue} 
-                        isListView={viewMode === 'list'} 
-                      />
+                      <VenueCard key={venue.id} venue={venue} isListView={viewMode === 'list'} />
                     ))}
                   </div>
 
                   {/* Pagination */}
                   {totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-2">
+                    <div className='flex items-center justify-center gap-2'>
                       <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        variant='outline'
+                        size='sm'
+                        onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                         disabled={currentPage === 1}
                       >
                         Previous
                       </Button>
-                      
+
                       {Array.from({ length: totalPages }, (_, i) => i + 1)
-                        .filter(page => 
-                          page === 1 || 
-                          page === totalPages || 
-                          Math.abs(page - currentPage) <= 2
-                        )
+                        .filter((page) => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2)
                         .map((page, index, arr) => (
-                          <div key={page} className="flex items-center">
+                          <div key={page} className='flex items-center'>
                             {index > 0 && arr[index - 1] !== page - 1 && (
-                              <span className="text-muted-foreground px-2">...</span>
+                              <span className='text-muted-foreground px-2'>...</span>
                             )}
                             <Button
-                              variant={currentPage === page ? "default" : "outline"}
-                              size="sm"
+                              variant={currentPage === page ? 'default' : 'outline'}
+                              size='sm'
                               onClick={() => setCurrentPage(page)}
                             >
                               {page}
                             </Button>
                           </div>
-                        ))
-                      }
-                      
+                        ))}
+
                       <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        variant='outline'
+                        size='sm'
+                        onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                         disabled={currentPage === totalPages}
                       >
                         Next
