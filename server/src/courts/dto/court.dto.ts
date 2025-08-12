@@ -1,7 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsNumber, Min, IsObject } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsNumber, Min, IsObject, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaginationQueryDto } from '../../common/dto/pagination.dto';
+
+export enum CourtStatus {
+  DRAFT = 'DRAFT',
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  SUSPENDED = 'SUSPENDED',
+}
 
 export class CreateCourtDto {
   @ApiProperty({ description: 'Court name' })
@@ -84,6 +92,11 @@ export class CourtQueryDto extends PaginationQueryDto {
   @IsBoolean()
   isActive?: boolean;
 
+  @ApiProperty({ description: 'Filter by approval status', required: false, enum: CourtStatus })
+  @IsOptional()
+  @IsEnum(CourtStatus)
+  status?: CourtStatus;
+
   @ApiProperty({ description: 'Include related data', required: false })
   @IsOptional()
   @IsString()
@@ -108,6 +121,9 @@ export class CourtResponseDto {
 
   @ApiProperty({ description: 'Court active status' })
   isActive: boolean;
+
+  @ApiProperty({ description: 'Court approval status', enum: CourtStatus })
+  status: CourtStatus;
 
   @ApiProperty({ description: 'Operating hours' })
   operatingHours: Record<string, unknown> | null;

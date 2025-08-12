@@ -123,6 +123,7 @@ export interface Court {
   sportType: string;
   pricePerHour: number;
   isActive: boolean;
+  status: 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
   operatingHours: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;

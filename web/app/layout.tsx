@@ -5,6 +5,7 @@ import { Poppins } from 'next/font/google';
 import Loading from './loading';
 import { Suspense } from 'react';
 import Providers from './providers';
+import ChatBot from '@/components/common/ChatBot';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -28,6 +29,7 @@ export default async function RootLayout({
           <Providers>
             <Toaster duration={2500} richColors closeButton position='top-right' />
             {children}
+            <ChatBot />
           </Providers>
         </Suspense>
       </body>

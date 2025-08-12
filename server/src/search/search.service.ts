@@ -120,6 +120,7 @@ export class SearchService {
       where: {
         AND: [
           { isActive: true },
+          { status: 'APPROVED' },
           { facility: { status: 'APPROVED' } },
           {
             OR: [

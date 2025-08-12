@@ -220,4 +220,17 @@ export class OwnerService {
       params: { facilityId },
     });
   }
+
+  // Admin court approval APIs
+  static async getPendingCourts() {
+    return await ApiClient.get<Court[]>('/api/courts/admin/pending');
+  }
+
+  static async approveCourt(id: string) {
+    return await ApiClient.post<Court>(`/api/courts/${id}/approve`);
+  }
+
+  static async rejectCourt(id: string) {
+    return await ApiClient.post<Court>(`/api/courts/${id}/reject`);
+  }
 }

@@ -146,4 +146,36 @@ export class CourtsController {
   deleteAllAvailabilitySlots(@Param('courtId') courtId: string, @CurrentUser() currentUser: CurrentUser) {
     return this.courtsService.deleteAllAvailabilitySlots(courtId, currentUser);
   }
+
+  @Get('/admin/pending')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get pending courts for admin approval' })
+  @ApiResponse({ status: 200, description: 'Pending courts retrieved successfully', type: [CourtResponseDto] })
+  getPendingCourts(@CurrentUser() currentUser: CurrentUser) {
+    return this.courtsService.getPendingCourts(currentUser);
+  }
+
+  @Post(':id/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Approve a court' })
+  @ApiResponse({ status: 200, description: 'Court approved successfully', type: CourtResponseDto })
+  @ApiResponse({ status: 404, description: 'Court not found' })
+  approveCourt(@Param('id') id: string, @CurrentUser() currentUser: CurrentUser) {
+    return this.courtsService.approveCourt(id, currentUser);
+  }
+
+  @Post(':id/reject')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reject a court' })
+  @ApiResponse({ status: 200, description: 'Court rejected successfully', type: CourtResponseDto })
+  @ApiResponse({ status: 404, description: 'Court not found' })
+  rejectCourt(@Param('id') id: string, @CurrentUser() currentUser: CurrentUser) {
+    return this.courtsService.rejectCourt(id, currentUser);
+  }
 }

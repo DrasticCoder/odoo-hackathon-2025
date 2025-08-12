@@ -242,9 +242,25 @@ export default function CourtsPage() {
                     {court.facility?.name || 'Unknown Facility'}
                   </CardDescription>
                 </div>
-                <Badge variant={court.isActive ? 'default' : 'secondary'}>
-                  {court.isActive ? 'Active' : 'Inactive'}
-                </Badge>
+                <div className='flex flex-col gap-1'>
+                  <Badge variant={court.isActive ? 'default' : 'secondary'}>
+                    {court.isActive ? 'Active' : 'Inactive'}
+                  </Badge>
+                  <Badge
+                    variant={
+                      court.status === 'APPROVED'
+                        ? 'default'
+                        : court.status === 'PENDING_APPROVAL'
+                          ? 'secondary'
+                          : court.status === 'REJECTED'
+                            ? 'destructive'
+                            : 'outline'
+                    }
+                    className='text-xs'
+                  >
+                    {court.status?.replace('_', ' ')}
+                  </Badge>
+                </div>
               </div>
             </CardHeader>
             <CardContent>

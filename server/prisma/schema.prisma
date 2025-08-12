@@ -98,7 +98,7 @@ model Facility {
   description   String?
   address       String
   shortLocation String?        @map("short_location")
-  status        FacilityStatus @default(PENDING_APPROVAL)
+  status        FacilityStatus @default(APPROVED)
   amenities     Json?          @map("amenities")
   about         String?        @map("about")
   avgRating     Float?         @map("avg_rating")
@@ -117,15 +117,16 @@ model Facility {
 }
 
 model Court {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  facilityId     String   @map("facility_id") @db.ObjectId
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  facilityId     String         @map("facility_id") @db.ObjectId
   name           String
-  sportType      String   @map("sport_type")
-  pricePerHour   Float    @map("price_per_hour")
-  isActive       Boolean  @default(true) @map("is_active")
-  operatingHours Json?    @map("operating_hours")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @default(now()) @map("updated_at")
+  sportType      String         @map("sport_type")
+  pricePerHour   Float          @map("price_per_hour")
+  isActive       Boolean        @default(true) @map("is_active")
+  status         FacilityStatus @default(PENDING_APPROVAL)
+  operatingHours Json?          @map("operating_hours")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @default(now()) @map("updated_at")
 
   facility     Facility           @relation(fields: [facilityId], references: [id])
   availability AvailabilitySlot[]
@@ -134,6 +135,7 @@ model Court {
 
   @@index([facilityId])
   @@index([sportType])
+  @@index([status])
   @@map("courts")
 }
 

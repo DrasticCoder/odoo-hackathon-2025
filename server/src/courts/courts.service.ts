@@ -49,7 +49,19 @@ export class CourtsService {
   }
 
   async findAll(query: CourtQueryDto, currentUser?: CurrentUser) {
-    const { page = 1, limit = 20, q, sort, facilityId, sportType, minPrice, maxPrice, isActive, include } = query;
+    const {
+      page = 1,
+      limit = 20,
+      q,
+      sort,
+      facilityId,
+      sportType,
+      minPrice,
+      maxPrice,
+      isActive,
+      include,
+      status,
+    } = query;
 
     console.log('Courts findAll - query:', query);
     console.log('Courts findAll - currentUser:', currentUser);
@@ -64,6 +76,9 @@ export class CourtsService {
         ownerId: currentUser.id,
       };
       console.log('Filtering courts by owner:', currentUser.id);
+    } else if (!currentUser || currentUser.role === UserRole.USER) {
+      where.status = 'APPROVED';
+      console.log('Filtering courts to only approved for public access');
     }
 
     if (facilityId) {
@@ -74,6 +89,7 @@ export class CourtsService {
     if (minPrice) where.pricePerHour = { ...((where.pricePerHour as object) || {}), gte: minPrice };
     if (maxPrice) where.pricePerHour = { ...((where.pricePerHour as object) || {}), lte: maxPrice };
     if (isActive !== undefined) where.isActive = isActive;
+    if (status) where.status = status;
 
     if (q) {
       where.OR = [
@@ -445,6 +461,86 @@ export class CourtsService {
     });
 
     return { message: `${deletedCount.count} availability slots deleted successfully` };
+  }
+
+  async approveCourt(id: string, currentUser: CurrentUser) {
+    if (currentUser.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('Only admins can approve courts');
+    }
+
+    const court = await this.prisma.court.findUnique({
+      where: { id },
+      include: {
+        facility: {
+          select: { id: true, name: true, shortLocation: true, ownerId: true },
+        },
+      },
+    });
+
+    if (!court) {
+      throw new NotFoundException('Court not found');
+    }
+
+    const updatedCourt = await this.prisma.court.update({
+      where: { id },
+      data: { status: 'APPROVED' },
+      include: {
+        facility: {
+          select: { id: true, name: true, shortLocation: true, ownerId: true },
+        },
+      },
+    });
+
+    return updatedCourt;
+  }
+
+  async rejectCourt(id: string, currentUser: CurrentUser) {
+    if (currentUser.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('Only admins can reject courts');
+    }
+
+    const court = await this.prisma.court.findUnique({
+      where: { id },
+      include: {
+        facility: {
+          select: { id: true, name: true, shortLocation: true, ownerId: true },
+        },
+      },
+    });
+
+    if (!court) {
+      throw new NotFoundException('Court not found');
+    }
+
+    const updatedCourt = await this.prisma.court.update({
+      where: { id },
+      data: { status: 'REJECTED' },
+      include: {
+        facility: {
+          select: { id: true, name: true, shortLocation: true, ownerId: true },
+        },
+      },
+    });
+
+    return updatedCourt;
+  }
+
+  async getPendingCourts(currentUser: CurrentUser) {
+    if (currentUser.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('Only admins can view pending courts');
+    }
+
+    const courts = await this.prisma.court.findMany({
+      where: { status: 'PENDING_APPROVAL' },
+      include: {
+        facility: {
+          select: { id: true, name: true, shortLocation: true, ownerId: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return courts;
   }
 
   private buildOrderBy(sort?: string) {

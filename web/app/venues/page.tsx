@@ -9,13 +9,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Search, Filter } from 'lucide-react';
 import Link from 'next/link';
-import { OwnerService } from '@/services/owner.service';
-import type { Facility } from '@/types/owner.types';
+import { VenuesService, type Venue } from '@/services/venues.service';
+
 import { toast } from 'sonner';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 export default function VenuesPage() {
-  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [facilities, setFacilities] = useState<Venue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [q, setQ] = useState('');
   const [sport, setSport] = useState<string>('all');
@@ -29,10 +29,10 @@ export default function VenuesPage() {
       const params: Record<string, unknown> = { page, limit, sort: 'name,asc' };
       if (q) params.q = q;
       if (sport !== 'all') params.sporttype = sport;
-      const res = await OwnerService.getFacilities(params);
+      const res = await VenuesService.getVenues(params);
       console.log(res);
       if (res.data) {
-        const items = Array.isArray(res.data.data) ? (res.data.data as Facility[]) : [];
+        const items = Array.isArray(res.data.data) ? res.data.data : [];
         setFacilities(items);
         setTotal(res.data.meta.total);
       } else {

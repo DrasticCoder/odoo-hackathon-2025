@@ -33,7 +33,7 @@ export class FacilitiesController {
   }
 
   @Get()
-  @ApiBearerAuth()
+  @Public()
   @ApiOperation({ summary: 'Get all facilities with search and filtering' })
   @ApiResponse({
     status: 200,

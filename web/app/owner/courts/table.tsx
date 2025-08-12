@@ -172,9 +172,25 @@ export function CourtsTable({ courts, onDelete, onToggleStatus, isLoading = fals
 
               {/* Status */}
               <TableCell>
-                <div className='flex items-center gap-2'>
-                  <div className={`h-2 w-2 rounded-full ${court.isActive ? 'bg-green-500' : 'bg-red-500'}`} />
-                  <span className='text-sm'>{court.isActive ? 'Active' : 'Inactive'}</span>
+                <div className='space-y-1'>
+                  <div className='flex items-center gap-2'>
+                    <div className={`h-2 w-2 rounded-full ${court.isActive ? 'bg-green-500' : 'bg-red-500'}`} />
+                    <span className='text-sm'>{court.isActive ? 'Active' : 'Inactive'}</span>
+                  </div>
+                  <Badge
+                    variant={
+                      court.status === 'APPROVED'
+                        ? 'default'
+                        : court.status === 'PENDING_APPROVAL'
+                          ? 'secondary'
+                          : court.status === 'REJECTED'
+                            ? 'destructive'
+                            : 'outline'
+                    }
+                    className='text-xs'
+                  >
+                    {court.status?.replace('_', ' ')}
+                  </Badge>
                 </div>
               </TableCell>
 

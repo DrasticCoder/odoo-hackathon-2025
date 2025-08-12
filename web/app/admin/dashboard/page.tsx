@@ -35,24 +35,27 @@ const mockAdminStats = {
 const mockPendingApprovals = [
   {
     id: '1',
+    courtName: 'Court A - Badminton',
     facilityName: 'SportZone Arena',
     ownerName: 'John Smith',
     submittedAt: '2 hours ago',
-    type: 'New Facility',
+    type: 'New Court',
   },
   {
     id: '2',
+    courtName: 'Tennis Court 1',
     facilityName: 'Elite Courts',
     ownerName: 'Sarah Johnson',
     submittedAt: '5 hours ago',
-    type: 'Facility Update',
+    type: 'New Court',
   },
   {
     id: '3',
+    courtName: 'Football Field',
     facilityName: 'Prime Sports',
     ownerName: 'Mike Davis',
     submittedAt: '1 day ago',
-    type: 'New Facility',
+    type: 'New Court',
   },
 ];
 
@@ -335,17 +338,17 @@ export default function AdminDashboardPage() {
         <TabsContent value='approvals' className='space-y-4'>
           <Card>
             <CardHeader>
-              <CardTitle>Pending Facility Approvals</CardTitle>
-              <CardDescription>Facilities waiting for review and approval</CardDescription>
+              <CardTitle>Pending Court Approvals</CardTitle>
+              <CardDescription>Courts waiting for review and approval</CardDescription>
             </CardHeader>
             <CardContent>
               <div className='space-y-4'>
                 {mockPendingApprovals.map((approval) => (
                   <div key={approval.id} className='flex items-center justify-between rounded-lg border p-4'>
                     <div className='space-y-1'>
-                      <p className='font-medium'>{approval.facilityName}</p>
+                      <p className='font-medium'>{approval.courtName}</p>
                       <p className='text-muted-foreground text-sm'>
-                        by {approval.ownerName} • {approval.submittedAt}
+                        at {approval.facilityName} by {approval.ownerName} • {approval.submittedAt}
                       </p>
                     </div>
                     <div className='flex items-center space-x-2'>
@@ -356,7 +359,7 @@ export default function AdminDashboardPage() {
                 ))}
               </div>
               <Button asChild variant='outline' className='mt-4 w-full'>
-                <Link href='/admin/approvals'>View All Approvals</Link>
+                <Link href='/admin/court-approvals'>View All Court Approvals</Link>
               </Button>
             </CardContent>
           </Card>
