@@ -9,10 +9,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
+import MediaUploader from '@/components/media-uploader';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { Facility } from '@/types/owner.types';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const facilitySchema = z.object({
   name: z.string().min(1, 'Facility name is required'),
@@ -26,7 +27,7 @@ type FacilityFormData = z.infer<typeof facilitySchema>;
 
 interface FacilityFormProps {
   initialData?: Facility;
-  onSubmit: (data: FacilityFormData & { amenities?: Record<string, unknown> }) => void;
+  onSubmit: (data: FacilityFormData & { amenities?: Record<string, unknown>; images?: string[] }) => void;
 }
 
 const commonAmenities = [
@@ -102,12 +103,20 @@ export default function FacilityForm({ initialData, onSubmit }: FacilityFormProp
       await onSubmit({
         ...data,
         amenities: amenitiesObj,
+        images,
       });
     } finally {
       setIsLoading(false);
     }
   };
 
+  const [images, setImages] = useState<string[]>((initialData as Facility & { images?: string[] })?.images || []);
+
+  const setValue = useCallback((field: string, value: string[]) => {
+    if (field === 'images') {
+      setImages(value);
+    }
+  }, []);
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className='space-y-6'>
       {/* Basic Information */}
@@ -164,7 +173,7 @@ export default function FacilityForm({ initialData, onSubmit }: FacilityFormProp
                 key={amenity}
                 className='hover:bg-accent flex items-center space-x-2 rounded-lg border p-2 transition-colors'
               >
-                <Switch
+                <Checkbox
                   checked={selectedAmenities.includes(amenity)}
                   onCheckedChange={() => handleAmenityToggle(amenity)}
                   id={`amenity-${amenity}`}
@@ -175,6 +184,20 @@ export default function FacilityForm({ initialData, onSubmit }: FacilityFormProp
               </div>
             ))}
           </div>
+
+          <Card>
+            <CardContent>
+              <Label className='mb-5'>Upload Facility Images</Label>
+              <MediaUploader
+                type='image'
+                multiple
+                folderName='facilities'
+                onUpload={(urls) => {
+                  setValue('images', [...images, ...urls]);
+                }}
+              />
+            </CardContent>
+          </Card>
 
           {/* Selected Amenities */}
           {selectedAmenities.length > 0 && (

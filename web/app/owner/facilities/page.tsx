@@ -6,12 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, MapPin, Star, Calendar, DollarSign, Grid3X3, List, AlertCircle } from 'lucide-react';
-import AuthGuard from '@/components/auth/AuthGuard';
-import { OwnerLayout } from '@/components/OwnerLayout';
+import { Plus, Edit, MapPin, Star, Calendar, Grid3X3, List, AlertCircle, IndianRupee } from 'lucide-react';
+
 import { OwnerService } from '@/services/owner.service';
 import { Facility, FacilityQuery } from '@/types/owner.types';
-import { UserRole } from '@/types/auth.type';
 import { toast } from 'sonner';
 import { FacilitiesTable } from './table';
 import { DeleteFacilityButton } from './delete';
@@ -203,8 +201,8 @@ export default function FacilitiesPage() {
                     <span>{facility.courtsCount || 0} Courts</span>
                   </div>
                   <div className='flex items-center gap-2'>
-                    <DollarSign className='text-muted-foreground h-4 w-4' />
-                    <span>{facility.startingPrice ? `$${facility.startingPrice}/hr` : 'No pricing'}</span>
+                    <IndianRupee className='text-muted-foreground h-4 w-4' />
+                    <span>{facility.startingPrice ? `˝˝ ${facility.startingPrice}/hr` : 'No pricing'}</span>
                   </div>
                 </div>
 
@@ -261,99 +259,91 @@ export default function FacilitiesPage() {
 
   if (isLoading) {
     return (
-      <AuthGuard requiredRole={UserRole.OWNER}>
-        <OwnerLayout>
-          <div className='container mx-auto p-6'>
-            <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
-              {[...Array(6)].map((_, i) => (
-                <Card key={i} className='animate-pulse'>
-                  <CardHeader>
-                    <div className='bg-muted h-4 w-3/4 rounded'></div>
-                    <div className='bg-muted h-3 w-1/2 rounded'></div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className='space-y-2'>
-                      <div className='bg-muted h-3 rounded'></div>
-                      <div className='bg-muted h-3 w-2/3 rounded'></div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </OwnerLayout>
-      </AuthGuard>
+      <div className='container mx-auto p-6'>
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+          {[...Array(6)].map((_, i) => (
+            <Card key={i} className='animate-pulse'>
+              <CardHeader>
+                <div className='bg-muted h-4 w-3/4 rounded'></div>
+                <div className='bg-muted h-3 w-1/2 rounded'></div>
+              </CardHeader>
+              <CardContent>
+                <div className='space-y-2'>
+                  <div className='bg-muted h-3 rounded'></div>
+                  <div className='bg-muted h-3 w-2/3 rounded'></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     );
   }
 
   return (
-    <AuthGuard requiredRole={UserRole.OWNER}>
-      <OwnerLayout>
-        <div className='container mx-auto p-6'>
-          {/* Header */}
-          <div className='mb-6 flex items-center justify-between'>
-            <div>
-              <h1 className='text-foreground text-3xl font-bold'>Facility Management</h1>
-              <p className='text-muted-foreground'>Manage your sports facilities and courts</p>
-            </div>
-            <Button onClick={() => router.push('/owner/facilities/add')}>
-              <Plus className='mr-2 h-4 w-4' />
-              Add Facility
-            </Button>
-          </div>
-
-          {/* Error Display */}
-          {error && (
-            <Alert variant='destructive' className='mb-6'>
-              <AlertCircle className='h-4 w-4' />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {/* Filters */}
-          <div className='mb-6'>
-            <FacilityFilters onFiltersChange={handleFiltersChange} initialFilters={filters} isLoading={isLoading} />
-          </div>
-
-          {/* View Mode Toggle */}
-          <div className='mb-6 flex justify-end'>
-            <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'grid' | 'table')}>
-              <TabsList>
-                <TabsTrigger value='grid' className='flex items-center gap-2'>
-                  <Grid3X3 className='h-4 w-4' />
-                  Grid
-                </TabsTrigger>
-                <TabsTrigger value='table' className='flex items-center gap-2'>
-                  <List className='h-4 w-4' />
-                  Table
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          {/* Content */}
-          <div className='space-y-6'>
-            <Tabs value={viewMode} className='w-full'>
-              <TabsContent value='grid' className='mt-0'>
-                {renderGridView()}
-              </TabsContent>
-              <TabsContent value='table' className='mt-0'>
-                <FacilitiesTable facilities={facilities} onDelete={handleDeleteFacility} isLoading={isLoading} />
-              </TabsContent>
-            </Tabs>
-
-            {/* Pagination */}
-            {meta.total > 0 && (
-              <PaginationControls
-                meta={meta}
-                onPageChange={handlePageChange}
-                onLimitChange={handleLimitChange}
-                isLoading={isLoading}
-              />
-            )}
-          </div>
+    <div className='container mx-auto p-6'>
+      {/* Header */}
+      <div className='mb-6 flex items-center justify-between'>
+        <div>
+          <h1 className='text-foreground text-3xl font-bold'>Facility Management</h1>
+          <p className='text-muted-foreground'>Manage your sports facilities and courts</p>
         </div>
-      </OwnerLayout>
-    </AuthGuard>
+        <Button onClick={() => router.push('/owner/facilities/add')}>
+          <Plus className='mr-2 h-4 w-4' />
+          Add Facility
+        </Button>
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <Alert variant='destructive' className='mb-6'>
+          <AlertCircle className='h-4 w-4' />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Filters */}
+      <div className='mb-6'>
+        <FacilityFilters onFiltersChange={handleFiltersChange} initialFilters={filters} isLoading={isLoading} />
+      </div>
+
+      {/* View Mode Toggle */}
+      <div className='mb-6 flex justify-end'>
+        <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'grid' | 'table')}>
+          <TabsList>
+            <TabsTrigger value='grid' className='flex items-center gap-2'>
+              <Grid3X3 className='h-4 w-4' />
+              Grid
+            </TabsTrigger>
+            <TabsTrigger value='table' className='flex items-center gap-2'>
+              <List className='h-4 w-4' />
+              Table
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      {/* Content */}
+      <div className='space-y-6'>
+        <Tabs value={viewMode} className='w-full'>
+          <TabsContent value='grid' className='mt-0'>
+            {renderGridView()}
+          </TabsContent>
+          <TabsContent value='table' className='mt-0'>
+            <FacilitiesTable facilities={facilities} onDelete={handleDeleteFacility} isLoading={isLoading} />
+          </TabsContent>
+        </Tabs>
+
+        {/* Pagination */}
+        {meta.total > 0 && (
+          <PaginationControls
+            meta={meta}
+            onPageChange={handlePageChange}
+            onLimitChange={handleLimitChange}
+            isLoading={isLoading}
+          />
+        )}
+      </div>
+    </div>
   );
 }

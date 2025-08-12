@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Edit, Eye, MapPin, Star, Calendar, DollarSign, Building2 } from 'lucide-react';
+import { Edit, Eye, MapPin, Star, Calendar, Building2, IndianRupee } from 'lucide-react';
 import { Facility } from '@/types/owner.types';
 import { DeleteFacilityButton } from './delete';
 
@@ -204,7 +204,7 @@ export function FacilitiesTable({ facilities, onDelete, isLoading = false }: Fac
                     <span>{facility.courtsCount || 0} courts</span>
                   </div>
                   <div className='text-muted-foreground flex items-center gap-1'>
-                    <DollarSign className='h-3 w-3' />
+                    <IndianRupee className='h-3 w-3' />
                     <span>{facility.startingPrice ? `$${facility.startingPrice}/hr` : 'No pricing'}</span>
                   </div>
                 </div>

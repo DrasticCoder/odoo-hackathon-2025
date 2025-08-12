@@ -59,9 +59,12 @@ export function DashboardSidebar({ className }: DashboardSidebarProps) {
     }
   };
 
-  const handleSignOut = () => {
-    // This will be handled by NextAuth
-    router.push('/api/auth/signout');
+  const handleSignOut = async () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    }
+    router.push('/login');
   };
 
   return (

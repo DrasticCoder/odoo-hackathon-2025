@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsEnum, IsNumber, Min, IsObject } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsNumber, Min, IsObject, IsArray, IsUrl } from 'class-validator';
 import { Type } from 'class-transformer';
 import { FacilityStatus } from 'prisma/client';
 import { PaginationQueryDto } from '../../common/dto/pagination.dto';
@@ -32,6 +32,12 @@ export class CreateFacilityDto {
   @IsOptional()
   @IsString()
   about?: string;
+
+  @ApiProperty({ description: 'Photo URLs', required: false, type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsUrl({}, { each: true })
+  photoUrls?: string[];
 }
 
 export class UpdateFacilityDto {
@@ -69,6 +75,12 @@ export class UpdateFacilityDto {
   @IsOptional()
   @IsEnum(FacilityStatus)
   status?: FacilityStatus;
+
+  @ApiProperty({ description: 'Photo URLs', required: false, type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsUrl({}, { each: true })
+  photoUrls?: string[];
 }
 
 export class FacilityQueryDto extends PaginationQueryDto {
@@ -185,6 +197,9 @@ export class FacilityResponseDto {
 
   @ApiProperty({ description: 'Available sport types', required: false })
   sportTypes?: string[];
+
+  @ApiProperty({ description: 'Photo URLs', required: false, type: [String] })
+  photoUrls?: string[];
 }
 
 export class ApproveFacilityDto {

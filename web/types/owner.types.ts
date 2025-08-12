@@ -84,6 +84,7 @@ export interface Facility {
   sportTypes?: string[];
   courtsCount?: number;
   reviewsCount?: number;
+  photoUrls?: string[];
   owner?: {
     id: string;
     name: string;
@@ -100,6 +101,7 @@ export interface CreateFacilityRequest {
   shortLocation?: string;
   amenities?: Record<string, unknown>;
   about?: string;
+  photoUrls?: string[];
 }
 
 export interface UpdateFacilityRequest {
@@ -110,6 +112,7 @@ export interface UpdateFacilityRequest {
   amenities?: Record<string, unknown>;
   about?: string;
   status?: 'DRAFT' | 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'SUSPENDED';
+  photoUrls?: string[];
 }
 
 // Court Management Types
@@ -264,4 +267,56 @@ export interface FacilityFilters {
     max?: number;
   };
   ratingMin?: number;
+}
+
+// Review Management Types
+export interface Review {
+  id: string;
+  userId: string;
+  facilityId: string;
+  bookingId: string | null;
+  rating: number;
+  comment: string | null;
+  isApproved: boolean;
+  createdAt: string;
+  user?: {
+    id: string;
+    name: string | null;
+    email: string;
+    avatarUrl: string | null;
+  };
+  facility?: {
+    id: string;
+    name: string;
+    shortLocation: string | null;
+    avgRating: number | null;
+  };
+}
+
+export interface ReviewQuery {
+  page?: number;
+  limit?: number;
+  q?: string;
+  sort?: string;
+  facilityId?: string;
+  userId?: string;
+  minRating?: number;
+  maxRating?: number;
+  isApproved?: boolean;
+  include?: string;
+  [key: string]: unknown;
+}
+
+export interface ReviewStats {
+  totalReviews: number;
+  approvedReviews: number;
+  pendingReviews: number;
+  averageRating: number;
+  ratingDistribution: {
+    1: number;
+    2: number;
+    3: number;
+    4: number;
+    5: number;
+  };
 }

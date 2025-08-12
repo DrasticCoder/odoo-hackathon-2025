@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import ReCAPTCHAComponent, { ReCAPTCHAHandle } from '@/components/auth/ReCAPTCHA';
 
 import { loginSchema, LoginFormData } from '@/validations';
 import { AuthService } from '@/services/auth.service';
@@ -23,12 +24,15 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [, setRecaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHAHandle>(null);
   const router = useRouter();
   const { login } = useAuthStore();
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -38,13 +42,20 @@ export default function LoginForm() {
     setIsLoading(true);
     setError(null);
 
+    // Check if reCAPTCHA token is present
+    if (!data.recaptchaToken) {
+      setError('Please complete the reCAPTCHA verification.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await AuthService.login(data);
       if (response.data) {
         const { user, token } = response.data;
         login(user, token);
 
-        // redirect to respective dashboard= jiya
+        // redirect to respective dashboard
         switch (user.role) {
           case UserRole.ADMIN:
             router.push('/admin/dashboard');
@@ -65,13 +76,43 @@ export default function LoginForm() {
         } else {
           setError(response.error.message || 'Login failed. Please try again.');
         }
+
+        // Reset reCAPTCHA on error
+        recaptchaRef.current?.resetRecaptcha();
+        setRecaptchaToken(null);
+        setValue('recaptchaToken', '');
       }
     } catch (err) {
       console.error('Login error:', err);
       setError('Network error. Please check your connection and try again.');
+
+      // Reset reCAPTCHA on error
+      recaptchaRef.current?.resetRecaptcha();
+      setRecaptchaToken(null);
+      setValue('recaptchaToken', '');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRecaptchaVerify = (token: string | null) => {
+    setRecaptchaToken(token);
+    setValue('recaptchaToken', token || '');
+    if (token) {
+      setError(null); // Clear any reCAPTCHA-related errors
+    }
+  };
+
+  const handleRecaptchaExpired = () => {
+    setRecaptchaToken(null);
+    setValue('recaptchaToken', '');
+    setError('reCAPTCHA has expired. Please verify again.');
+  };
+
+  const handleRecaptchaError = () => {
+    setRecaptchaToken(null);
+    setValue('recaptchaToken', '');
+    setError('reCAPTCHA verification failed. Please try again.');
   };
 
   return (
@@ -123,6 +164,19 @@ export default function LoginForm() {
               </button>
             </div>
             {errors.password && <p className='text-sm text-red-500'>{errors.password.message}</p>}
+          </div>
+
+          {/* reCAPTCHA */}
+          <div className='space-y-2'>
+            <Label htmlFor='recaptcha'>Security Verification</Label>
+            <ReCAPTCHAComponent
+              ref={recaptchaRef}
+              onVerify={handleRecaptchaVerify}
+              onExpired={handleRecaptchaExpired}
+              onError={handleRecaptchaError}
+              className='flex justify-center'
+            />
+            {errors.recaptchaToken && <p className='text-sm text-red-500'>{errors.recaptchaToken.message}</p>}
           </div>
 
           <Button type='submit' className='w-full' disabled={isLoading}>

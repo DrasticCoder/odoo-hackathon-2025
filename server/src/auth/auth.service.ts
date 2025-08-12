@@ -6,6 +6,7 @@ import { config } from 'src/common/config';
 import { generateOtp } from 'src/common/utils/auth.utils';
 import { MailService } from 'src/mail/mail.service';
 import { SignUpDto, LoginDto } from './dto/auth.dto';
+import { RecaptchaService } from './services/recaptcha.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -17,6 +18,7 @@ export class AuthService {
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly recaptchaService: RecaptchaService,
   ) {
     this.oauth2Client = new google.auth.OAuth2(
       config.google.clientId,
@@ -229,7 +231,10 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const { email, password } = loginDto;
+    const { email, password, recaptchaToken } = loginDto;
+
+    // Verify reCAPTCHA first
+    await this.recaptchaService.verifyRecaptcha(recaptchaToken);
 
     const user = await this.prismaService.user.findUnique({
       where: { email },

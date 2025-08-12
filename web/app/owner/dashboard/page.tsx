@@ -1,19 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, TrendingUp, TrendingDown, Users, Building2, DollarSign, BarChart3, Link, Plus } from 'lucide-react';
-import AuthGuard from '@/components/auth/AuthGuard';
-import { OwnerLayout } from '@/components/OwnerLayout';
+import { Calendar, TrendingUp, TrendingDown, Building2, BarChart3, Plus, IndianRupee } from 'lucide-react';
 import { OwnerService } from '@/services/owner.service';
 import { OwnerDashboardStats, UpcomingBooking, RecentActivity, BookingTrend } from '@/types/owner.types';
-import { UserRole } from '@/types/auth.type';
 import { toast } from 'sonner';
-import { DashboardLayout } from '@/components/DashboardLayout';
-import { useAuthStore } from '@/store';
 
 export default function OwnerDashboardPage() {
   const [stats, setStats] = useState<OwnerDashboardStats | null>(null);
@@ -22,8 +18,6 @@ export default function OwnerDashboardPage() {
   const [bookingTrends, setBookingTrends] = useState<BookingTrend[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<'daily' | 'weekly' | 'monthly'>('daily');
-
-  const { user } = useAuthStore();
 
   const loadDashboardData = useCallback(async () => {
     setIsLoading(true);
@@ -61,17 +55,17 @@ export default function OwnerDashboardPage() {
   const formatTimeUntil = (minutes: number) => {
     if (minutes < 60) return `${minutes}m`;
     const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours}h ${remainingMinutes}m`;
+    const mins = minutes % 60;
+    return `${hours}h ${mins}m`;
   };
 
-  const getGrowthIcon = (percentage: number) => {
-    if (percentage > 0) return <TrendingUp className='text-primary h-4 w-4' />;
-    if (percentage < 0) return <TrendingDown className='text-destructive h-4 w-4' />;
+  const getGrowthIcon = (growth: number) => {
+    if (growth > 0) return <TrendingUp className='text-primary h-4 w-4' />;
+    if (growth < 0) return <TrendingDown className='text-destructive h-4 w-4' />;
     return null;
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string) => {
     switch (status.toLowerCase()) {
       case 'confirmed':
         return 'default';
@@ -82,280 +76,284 @@ export default function OwnerDashboardPage() {
       case 'completed':
         return 'outline';
       default:
-        return 'outline';
-    }
-  };
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'booking_created':
-        return '📅';
-      case 'booking_cancelled':
-        return '❌';
-      case 'facility_updated':
-        return '🏢';
-      case 'court_added':
-        return '🎾';
-      default:
-        return '📝';
+        return 'secondary';
     }
   };
 
   if (isLoading) {
     return (
-      <AuthGuard requiredRole={[UserRole.OWNER]}>
-        <OwnerLayout>
-          <div className='container mx-auto p-6'>
-            <div className='mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
-              {[...Array(4)].map((_, i) => (
-                <Card key={i}>
-                  <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                    <div className='bg-muted h-4 w-20 animate-pulse rounded'></div>
-                    <div className='bg-muted h-4 w-4 animate-pulse rounded'></div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className='bg-muted mb-2 h-8 w-16 animate-pulse rounded'></div>
-                    <div className='bg-muted h-3 w-24 animate-pulse rounded'></div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </OwnerLayout>
-      </AuthGuard>
+      <div className='space-y-6 p-6'>
+        <div className='space-y-2'>
+          <div className='bg-muted h-8 w-64 animate-pulse rounded'></div>
+          <div className='bg-muted h-4 w-96 animate-pulse rounded'></div>
+        </div>
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader className='space-y-2'>
+                <div className='bg-muted h-4 w-24 animate-pulse rounded'></div>
+                <div className='bg-muted h-8 w-16 animate-pulse rounded'></div>
+              </CardHeader>
+              <CardContent>
+                <div className='bg-muted h-3 w-24 animate-pulse rounded'></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     );
   }
 
   return (
-    <AuthGuard requiredRole={UserRole.OWNER}>
-      <DashboardLayout>
-        <div className='bg-background space-y-6 p-6'>
-          {/* Header */}
-          <div className='flex items-center justify-between'>
-            <div>
-              <h1 className='text-3xl font-bold text-gray-300'>Welcome back, {user?.name}! 🏟️</h1>
-              <p className='mt-1 text-gray-400'>Manage your sports facilities and grow your business</p>
-            </div>
-            <div className='flex gap-3'>
-              <Button asChild className='bg-primary hover:bg-sidebar-primary'>
-                <Link href='/owner/facilities/add'>
-                  <Plus className='mr-2 h-4 w-4' />
-                  Add Facility
-                </Link>
-              </Button>
-              <Button asChild variant='outline'>
-                <Link href='/owner/analytics'>
-                  <BarChart3 className='mr-2 h-4 w-4' />
-                  Analytics
-                </Link>
-              </Button>
-            </div>
-          </div>
-
-          {/* KPI Cards */}
-          <div className='mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>Total Bookings</CardTitle>
-                <Calendar className='text-muted-foreground h-4 w-4' />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>{stats?.totalBookings || 0}</div>
-                <p className='text-muted-foreground text-xs'>
-                  {stats?.confirmedBookings || 0} confirmed, {stats?.pendingBookings || 0} pending
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>Active Courts</CardTitle>
-                <Building2 className='text-muted-foreground h-4 w-4' />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>{stats?.activeCourts || 0}</div>
-                <p className='text-muted-foreground text-xs'>Across {stats?.totalFacilities || 0} facilities</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>Total Earnings</CardTitle>
-                <DollarSign className='text-muted-foreground h-4 w-4' />
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>{formatCurrency(stats?.totalEarnings || 0)}</div>
-                <p className='text-muted-foreground text-xs'>
-                  Avg: {formatCurrency(stats?.averageBookingValue || 0)} per booking
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                <CardTitle className='text-sm font-medium'>Monthly Growth</CardTitle>
-                {getGrowthIcon(stats?.growthPercentage || 0)}
-              </CardHeader>
-              <CardContent>
-                <div className='text-2xl font-bold'>
-                  {stats?.growthPercentage ? `${stats.growthPercentage.toFixed(1)}%` : '0%'}
-                </div>
-                <p className='text-muted-foreground text-xs'>
-                  This month: {formatCurrency(stats?.thisMonthEarnings || 0)}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content Tabs */}
-          <Tabs defaultValue='overview' className='space-y-6'>
-            <TabsList>
-              <TabsTrigger value='overview'>Overview</TabsTrigger>
-              <TabsTrigger value='bookings'>Bookings</TabsTrigger>
-              <TabsTrigger value='analytics'>Analytics</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value='overview' className='space-y-6'>
-              <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-                {/* Upcoming Bookings */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Upcoming Bookings</CardTitle>
-                    <CardDescription>Next bookings at your facilities</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className='space-y-4'>
-                      {upcomingBookings.slice(0, 5).map((booking) => (
-                        <div key={booking.id} className='flex items-center justify-between rounded-lg border p-3'>
-                          <div className='flex-1'>
-                            <div className='font-medium'>{booking.userName}</div>
-                            <div className='text-muted-foreground text-sm'>
-                              {booking.facilityName} - {booking.courtName}
-                            </div>
-                            <div className='text-muted-foreground text-xs'>
-                              {new Date(booking.startDatetime).toLocaleString()}
-                            </div>
-                          </div>
-                          <div className='text-right'>
-                            <Badge variant={getStatusColor(booking.status)}>{booking.status}</Badge>
-                            <div className='text-muted-foreground mt-1 text-xs'>
-                              in {formatTimeUntil(booking.timeUntilBooking)}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      {upcomingBookings.length === 0 && (
-                        <p className='text-muted-foreground py-4 text-center'>No upcoming bookings</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Recent Activity */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>Latest updates from your facilities</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className='space-y-4'>
-                      {recentActivity.slice(0, 5).map((activity) => (
-                        <div key={activity.id} className='flex items-start gap-3'>
-                          <div className='text-lg'>{getActivityIcon(activity.type)}</div>
-                          <div className='flex-1'>
-                            <div className='text-sm'>{activity.description}</div>
-                            {activity.userName && (
-                              <div className='text-muted-foreground text-xs'>by {activity.userName}</div>
-                            )}
-                            <div className='text-muted-foreground text-xs'>
-                              {new Date(activity.timestamp).toLocaleString()}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      {recentActivity.length === 0 && (
-                        <p className='text-muted-foreground py-4 text-center'>No recent activity</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value='bookings' className='space-y-6'>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Booking Overview</CardTitle>
-                  <CardDescription>Manage your facility bookings</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='py-8 text-center'>
-                    <Users className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
-                    <h3 className='mb-2 text-lg font-medium'>Booking Management</h3>
-                    <p className='text-muted-foreground mb-4'>View and manage all bookings across your facilities</p>
-                    <Button>View All Bookings</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value='analytics' className='space-y-6'>
-              <Card>
-                <CardHeader className='flex flex-row items-center justify-between'>
-                  <div>
-                    <CardTitle>Booking Trends</CardTitle>
-                    <CardDescription>Track your booking performance over time</CardDescription>
-                  </div>
-                  <div className='flex gap-2'>
-                    <Button
-                      variant={selectedPeriod === 'daily' ? 'default' : 'outline'}
-                      size='sm'
-                      onClick={() => setSelectedPeriod('daily')}
-                    >
-                      Daily
-                    </Button>
-                    <Button
-                      variant={selectedPeriod === 'weekly' ? 'default' : 'outline'}
-                      size='sm'
-                      onClick={() => setSelectedPeriod('weekly')}
-                    >
-                      Weekly
-                    </Button>
-                    <Button
-                      variant={selectedPeriod === 'monthly' ? 'default' : 'outline'}
-                      size='sm'
-                      onClick={() => setSelectedPeriod('monthly')}
-                    >
-                      Monthly
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className='space-y-4'>
-                    {bookingTrends.map((trend, index) => (
-                      <div key={index} className='flex items-center justify-between rounded-lg border p-3'>
-                        <div>
-                          <div className='font-medium'>{trend.period}</div>
-                          <div className='text-muted-foreground text-sm'>{trend.bookings} bookings</div>
-                        </div>
-                        <div className='text-right'>
-                          <div className='font-medium'>{formatCurrency(trend.earnings)}</div>
-                          <div className='text-muted-foreground text-sm'>
-                            {formatCurrency(trend.bookings > 0 ? trend.earnings / trend.bookings : 0)} avg
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    {bookingTrends.length === 0 && (
-                      <p className='text-muted-foreground py-4 text-center'>No booking trends data</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+    <div className='space-y-6 p-6'>
+      {/* Header */}
+      <div className='flex items-center justify-between'>
+        <div>
+          <h1 className='text-foreground text-3xl font-bold'>Dashboard Overview</h1>
+          <p className='text-muted-foreground mt-1'>Monitor your facilities performance and manage your business</p>
         </div>
-      </DashboardLayout>
-    </AuthGuard>
+        <div className='flex gap-3'>
+          <Button asChild>
+            <Link href='/owner/facilities/add'>
+              <Plus className='mr-2 h-4 w-4' />
+              Add Facility
+            </Link>
+          </Button>
+          <Button asChild variant='outline'>
+            <Link href='/owner/analytics'>
+              <BarChart3 className='mr-2 h-4 w-4' />
+              Analytics
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
+        <Card>
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium'>Total Bookings</CardTitle>
+            <Calendar className='text-muted-foreground h-4 w-4' />
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold'>{stats?.totalBookings || 0}</div>
+            <div className='text-muted-foreground flex items-center text-xs'>
+              {getGrowthIcon(stats?.growthPercentage || 0)}
+              <span className='ml-1'>
+                {stats?.growthPercentage && stats.growthPercentage > 0 ? '+' : ''}
+                {stats?.growthPercentage || 0}% from last month
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium'>Active Courts</CardTitle>
+            <Building2 className='text-muted-foreground h-4 w-4' />
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold'>{stats?.activeCourts || 0}</div>
+            <div className='text-muted-foreground flex items-center text-xs'>
+              <span>across {stats?.totalFacilities || 0} facilities</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium'>Monthly Earnings</CardTitle>
+            <IndianRupee className='text-muted-foreground h-4 w-4' />
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold'>{formatCurrency(stats?.thisMonthEarnings || 0)}</div>
+            <div className='text-muted-foreground flex items-center text-xs'>
+              {getGrowthIcon(stats?.growthPercentage || 0)}
+              <span className='ml-1'>
+                {stats?.growthPercentage && stats.growthPercentage > 0 ? '+' : ''}
+                {stats?.growthPercentage || 0}% from last month
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+            <CardTitle className='text-sm font-medium'>Occupancy Rate</CardTitle>
+            <BarChart3 className='text-muted-foreground h-4 w-4' />
+          </CardHeader>
+          <CardContent>
+            <div className='text-2xl font-bold'>
+              {Math.round(((stats?.confirmedBookings || 0) / Math.max(stats?.totalBookings || 1, 1)) * 100)}%
+            </div>
+            <div className='text-muted-foreground flex items-center text-xs'>
+              <span>average across all courts</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content Tabs */}
+      <Tabs defaultValue='overview' className='space-y-4'>
+        <TabsList>
+          <TabsTrigger value='overview'>Overview</TabsTrigger>
+          <TabsTrigger value='bookings'>Recent Bookings</TabsTrigger>
+          <TabsTrigger value='activity'>Activity</TabsTrigger>
+          <TabsTrigger value='trends'>Trends</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value='overview' className='space-y-4'>
+          <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
+            {/* Upcoming Bookings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Upcoming Bookings</CardTitle>
+                <CardDescription>Next bookings for your facilities</CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {upcomingBookings.length === 0 ? (
+                  <p className='text-muted-foreground py-4 text-center'>No upcoming bookings</p>
+                ) : (
+                  upcomingBookings.slice(0, 5).map((booking) => (
+                    <div key={booking.id} className='flex items-center space-x-4'>
+                      <div className='min-w-0 flex-1'>
+                        <p className='text-foreground truncate text-sm font-medium'>
+                          {booking.facilityName} - {booking.courtName}
+                        </p>
+                        <p className='text-muted-foreground text-sm'>
+                          {booking.userName} • {formatTimeUntil(booking.timeUntilBooking)} from now
+                        </p>
+                      </div>
+                      <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
+                    </div>
+                  ))
+                )}
+                {upcomingBookings.length > 5 && (
+                  <Button asChild variant='outline' className='mt-4 w-full'>
+                    <Link href='/owner/bookings'>View All Bookings</Link>
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Latest activities across your facilities</CardDescription>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {recentActivity.length === 0 ? (
+                  <p className='text-muted-foreground py-4 text-center'>No recent activity</p>
+                ) : (
+                  recentActivity.slice(0, 5).map((activity) => (
+                    <div key={activity.id} className='flex items-start space-x-3'>
+                      <div className='min-w-0 flex-1'>
+                        <p className='text-foreground text-sm'>{activity.description}</p>
+                        <p className='text-muted-foreground text-xs'>
+                          {new Date(activity.timestamp).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value='bookings' className='space-y-4'>
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Bookings</CardTitle>
+              <CardDescription>Latest bookings across all your facilities</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='space-y-4'>
+                {upcomingBookings.map((booking) => (
+                  <div key={booking.id} className='flex items-center justify-between rounded-lg border p-4'>
+                    <div className='space-y-1'>
+                      <p className='font-medium'>
+                        {booking.facilityName} - {booking.courtName}
+                      </p>
+                      <p className='text-muted-foreground text-sm'>
+                        {booking.userName} • {formatTimeUntil(booking.timeUntilBooking)} from now
+                      </p>
+                    </div>
+                    <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value='activity' className='space-y-4'>
+          <Card>
+            <CardHeader>
+              <CardTitle>Activity Feed</CardTitle>
+              <CardDescription>All recent activities and updates</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='space-y-4'>
+                {recentActivity.map((activity) => (
+                  <div key={activity.id} className='flex items-start space-x-3 rounded-lg border p-4'>
+                    <div className='flex-1'>
+                      <p className='text-sm'>{activity.description}</p>
+                      <p className='text-muted-foreground mt-1 text-xs'>
+                        {new Date(activity.timestamp).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value='trends' className='space-y-4'>
+          <div className='mb-4 flex items-center space-x-2'>
+            <label htmlFor='period' className='text-sm font-medium'>
+              Period:
+            </label>
+            <select
+              id='period'
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value as 'daily' | 'weekly' | 'monthly')}
+              className='rounded border px-3 py-1 text-sm'
+            >
+              <option value='daily'>Daily</option>
+              <option value='weekly'>Weekly</option>
+              <option value='monthly'>Monthly</option>
+            </select>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Booking Trends</CardTitle>
+              <CardDescription>
+                {selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1)} booking patterns
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className='space-y-4'>
+                {bookingTrends.map((trend, index) => (
+                  <div key={index} className='flex items-center justify-between rounded-lg border p-4'>
+                    <div>
+                      <p className='font-medium'>{trend.date}</p>
+                      <p className='text-muted-foreground text-sm'>{trend.bookings} bookings</p>
+                    </div>
+                    <div className='text-right'>
+                      <p className='font-medium'>{formatCurrency(trend.earnings)}</p>
+                      <p className='text-muted-foreground text-sm'>earnings</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }

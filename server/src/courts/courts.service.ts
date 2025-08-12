@@ -48,14 +48,28 @@ export class CourtsService {
     return court;
   }
 
-  async findAll(query: CourtQueryDto) {
+  async findAll(query: CourtQueryDto, currentUser?: CurrentUser) {
     const { page = 1, limit = 20, q, sort, facilityId, sportType, minPrice, maxPrice, isActive, include } = query;
+
+    console.log('Courts findAll - query:', query);
+    console.log('Courts findAll - currentUser:', currentUser);
 
     const skip = (page - 1) * limit;
 
     const where: Prisma.CourtWhereInput = {};
 
-    if (facilityId) where.facilityId = facilityId;
+    // Filter by owner if user is authenticated and is an owner
+    if (currentUser && currentUser.role === UserRole.OWNER) {
+      where.facility = {
+        ownerId: currentUser.id,
+      };
+      console.log('Filtering courts by owner:', currentUser.id);
+    }
+
+    if (facilityId) {
+      where.facilityId = facilityId;
+      console.log('Filtering courts by facility:', facilityId);
+    }
     if (sportType) where.sportType = { contains: sportType, mode: 'insensitive' };
     if (minPrice) where.pricePerHour = { ...((where.pricePerHour as object) || {}), gte: minPrice };
     if (maxPrice) where.pricePerHour = { ...((where.pricePerHour as object) || {}), lte: maxPrice };
@@ -100,6 +114,8 @@ export class CourtsService {
 
     const orderBy = this.buildOrderBy(sort);
 
+    console.log('Courts query where clause:', where);
+
     const [courts, total] = await Promise.all([
       this.prisma.court.findMany({
         where,
@@ -110,6 +126,8 @@ export class CourtsService {
       }),
       this.prisma.court.count({ where }),
     ]);
+
+    console.log('Courts found:', courts.length, 'total:', total);
 
     const meta = createPaginationMeta(total, page, limit);
     return { data: courts, meta };
@@ -291,19 +309,44 @@ export class CourtsService {
     const start = new Date(createSlotDto.start);
     const end = new Date(createSlotDto.end);
 
+    console.log('Creating availability slot:', {
+      courtId,
+      start: start.toISOString(),
+      end: end.toISOString(),
+      isBlocked: createSlotDto.isBlocked,
+      reason: createSlotDto.reason,
+    });
+
     if (start >= end) {
       throw new BadRequestException('Start time must be before end time');
     }
 
-    const overlapping = await this.prisma.availabilitySlot.findFirst({
+    // Check for existing slots in the same time range
+    const existingSlots = await this.prisma.availabilitySlot.findMany({
       where: {
         courtId,
         AND: [{ start: { lt: end } }, { end: { gt: start } }],
       },
+      include: {
+        court: {
+          select: { name: true },
+        },
+      },
     });
 
-    if (overlapping) {
-      throw new BadRequestException('Availability slot overlaps with existing slot');
+    console.log('Existing overlapping slots:', existingSlots);
+
+    if (existingSlots.length > 0) {
+      const slotDetails = existingSlots
+        .map(
+          (slot) =>
+            `${slot.court.name}: ${new Date(slot.start).toLocaleString()} - ${new Date(slot.end).toLocaleString()}`,
+        )
+        .join(', ');
+
+      throw new BadRequestException(
+        `Availability slot overlaps with ${existingSlots.length} existing slot(s): ${slotDetails}`,
+      );
     }
 
     const slot = await this.prisma.availabilitySlot.create({
@@ -377,6 +420,31 @@ export class CourtsService {
     });
 
     return { message: 'Availability slot deleted successfully' };
+  }
+
+  async deleteAllAvailabilitySlots(courtId: string, currentUser: CurrentUser) {
+    const court = await this.prisma.court.findUnique({
+      where: { id: courtId },
+      include: {
+        facility: {
+          select: { ownerId: true },
+        },
+      },
+    });
+
+    if (!court) {
+      throw new NotFoundException('Court not found');
+    }
+
+    if (currentUser.role !== UserRole.ADMIN && court.facility.ownerId !== currentUser.id) {
+      throw new ForbiddenException('You can only manage availability for your own courts');
+    }
+
+    const deletedCount = await this.prisma.availabilitySlot.deleteMany({
+      where: { courtId },
+    });
+
+    return { message: `${deletedCount.count} availability slots deleted successfully` };
   }
 
   private buildOrderBy(sort?: string) {

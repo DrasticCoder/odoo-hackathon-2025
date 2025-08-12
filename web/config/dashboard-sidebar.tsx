@@ -1,14 +1,24 @@
 // create interface with title , link,icon
 
-import { SettingsIcon, Home, UsersIcon } from 'lucide-react';
+import {
+  SettingsIcon,
+  Home,
+  UsersIcon,
+  BarChart3,
+  Building2,
+  Calendar,
+  Plus,
+  Users,
+  MessageSquare,
+} from 'lucide-react';
 
-interface AdminRoute {
+interface Route {
   title: string;
   link: string;
   icon: React.ElementType;
 }
 
-export const adminRoutes: AdminRoute[] = [
+export const adminRoutes: Route[] = [
   {
     title: 'Dashboard',
     link: '/admin/dashboard',
@@ -26,7 +36,7 @@ export const adminRoutes: AdminRoute[] = [
   },
 ];
 
-export const userRoutes: AdminRoute[] = [
+export const userRoutes: Route[] = [
   {
     title: 'Dashboard',
     link: '/user/dashboard',
@@ -44,20 +54,50 @@ export const userRoutes: AdminRoute[] = [
   },
 ];
 
-export const ownerRoutes: AdminRoute[] = [
+export const ownerRoutes: Route[] = [
   {
     title: 'Dashboard',
     link: '/owner/dashboard',
     icon: Home,
   },
   {
-    title: 'Properties',
-    link: '/owner/properties',
+    title: 'Facilities',
+    link: '/owner/facilities',
     icon: UsersIcon,
   },
   {
-    title: 'Settings',
-    link: '/owner/settings',
-    icon: SettingsIcon,
+    title: 'Courts',
+    link: '/owner/courts',
+    icon: UsersIcon,
+  },
+  {
+    title: 'My Facilities',
+    link: '/owner/facilities',
+    icon: Building2,
+  },
+  {
+    title: 'Add Facility',
+    link: '/owner/facilities/new',
+    icon: Plus,
+  },
+  {
+    title: 'Bookings',
+    link: '/owner/bookings',
+    icon: Calendar,
+  },
+  {
+    title: 'Reviews',
+    link: '/owner/reviews',
+    icon: MessageSquare,
+  },
+  {
+    title: 'Analytics',
+    link: '/owner/analytics',
+    icon: BarChart3,
+  },
+  {
+    title: 'Customers',
+    link: '/owner/customers',
+    icon: Users,
   },
 ];

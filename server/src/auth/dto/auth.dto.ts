@@ -57,4 +57,8 @@ export class LoginDto {
   @ApiProperty({ description: 'User password' })
   @IsString()
   password: string;
+
+  @ApiProperty({ description: 'Google reCAPTCHA token' })
+  @IsString()
+  recaptchaToken: string;
 }

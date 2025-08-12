@@ -18,7 +18,7 @@ import {
   SheetTrigger,
   SheetFooter,
 } from '@/components/ui/sheet';
-import { Filter, X, Search, SortAsc, SortDesc, Star, DollarSign } from 'lucide-react';
+import { Filter, X, Search, SortAsc, SortDesc, Star, IndianRupee } from 'lucide-react';
 import { FacilityQuery, FacilitySortOption } from '@/types/owner.types';
 
 interface FacilityFiltersProps {
@@ -40,12 +40,15 @@ const SPORT_TYPE_OPTIONS = [
   'Tennis',
   'Basketball',
   'Football',
+  'Soccer',
   'Cricket',
   'Volleyball',
   'Table Tennis',
   'Squash',
   'Gym',
   'Swimming',
+  'Hockey',
+  'Golf',
   'Other',
 ];
 
@@ -60,6 +63,8 @@ const SORT_OPTIONS: FacilitySortOption[] = [
   { label: 'Rating (Lowest)', value: 'avgRating,asc' },
   { label: 'Price (Lowest)', value: 'startingPrice,asc' },
   { label: 'Price (Highest)', value: 'startingPrice,desc' },
+  { label: 'Courts Count (Most)', value: 'courtsCount,desc' },
+  { label: 'Courts Count (Least)', value: 'courtsCount,asc' },
 ];
 
 export function FacilityFilters({ onFiltersChange, initialFilters = {}, isLoading = false }: FacilityFiltersProps) {
@@ -213,20 +218,30 @@ export function FacilityFilters({ onFiltersChange, initialFilters = {}, isLoadin
                 <div>
                   <Label className='text-base font-medium'>Sport Type</Label>
                   <div className='mt-2 grid grid-cols-2 gap-2'>
-                    {SPORT_TYPE_OPTIONS.map((sport) => (
-                      <div key={sport} className='flex items-center space-x-2'>
-                        <Checkbox
-                          id={sport}
-                          checked={localFilters.sporttype === sport}
-                          onCheckedChange={(checked) =>
-                            handleLocalFilterChange('sporttype', checked ? sport : undefined)
-                          }
-                        />
-                        <Label htmlFor={sport} className='text-sm font-normal'>
-                          {sport}
-                        </Label>
-                      </div>
-                    ))}
+                    {SPORT_TYPE_OPTIONS.map((sport) => {
+                      const selectedSports = localFilters.sporttype ? localFilters.sporttype.split(',') : [];
+                      return (
+                        <div key={sport} className='flex items-center space-x-2'>
+                          <Checkbox
+                            id={sport}
+                            checked={selectedSports.includes(sport)}
+                            onCheckedChange={(checked) => {
+                              const currentSports = localFilters.sporttype ? localFilters.sporttype.split(',') : [];
+                              const newSports = checked
+                                ? [...currentSports, sport]
+                                : currentSports.filter((s) => s !== sport);
+                              handleLocalFilterChange(
+                                'sporttype',
+                                newSports.length > 0 ? newSports.join(',') : undefined
+                              );
+                            }}
+                          />
+                          <Label htmlFor={sport} className='text-sm font-normal'>
+                            {sport}
+                          </Label>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -235,7 +250,7 @@ export function FacilityFilters({ onFiltersChange, initialFilters = {}, isLoadin
                 {/* Price Range Filter */}
                 <div>
                   <Label className='flex items-center gap-2 text-base font-medium'>
-                    <DollarSign className='h-4 w-4' />
+                    <IndianRupee className='h-4 w-4' />
                     Price Range (per hour)
                   </Label>
                   <div className='mt-4 space-y-4'>
@@ -351,7 +366,7 @@ export function FacilityFilters({ onFiltersChange, initialFilters = {}, isLoadin
 
           {filters.sporttype && (
             <Badge variant='secondary' className='flex items-center gap-1'>
-              Sport: {filters.sporttype}
+              Sport: {filters.sporttype.split(',').join(', ')}
               <Button
                 variant='ghost'
                 size='sm'
@@ -368,7 +383,7 @@ export function FacilityFilters({ onFiltersChange, initialFilters = {}, isLoadin
 
           {(filters.minprice || filters.maxprice) && (
             <Badge variant='secondary' className='flex items-center gap-1'>
-              <DollarSign className='h-3 w-3' />${filters.minprice || 0} - ${filters.maxprice || '1000+'}
+              <IndianRupee className='h-3 w-3' />${filters.minprice || 0} - ${filters.maxprice || '1000+'}
               <Button
                 variant='ghost'
                 size='sm'

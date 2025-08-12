@@ -9,10 +9,12 @@ export class FacilitiesService {
   constructor(private prisma: PrismaService) {}
 
   async create(createFacilityDto: CreateFacilityDto, ownerId: string) {
+    const { photoUrls, ...facilityData } = createFacilityDto;
+
     const facility = await this.prisma.facility.create({
       data: {
-        ...createFacilityDto,
-        amenities: createFacilityDto.amenities as Prisma.InputJsonValue,
+        ...facilityData,
+        amenities: facilityData.amenities as Prisma.InputJsonValue,
         ownerId,
         status: FacilityStatus.PENDING_APPROVAL,
       },
@@ -22,6 +24,16 @@ export class FacilitiesService {
         },
       },
     });
+
+    // Create photo records if photoUrls provided
+    if (photoUrls && photoUrls.length > 0) {
+      await this.prisma.photo.createMany({
+        data: photoUrls.map((url) => ({
+          url,
+          facilityId: facility.id,
+        })),
+      });
+    }
 
     return facility;
   }
@@ -62,12 +74,24 @@ export class FacilitiesService {
     }
 
     if (sportType || minPrice || maxPrice) {
+      const courtsFilter: Prisma.CourtWhereInput = {};
+
+      if (sportType) {
+        const sportTypes = sportType.split(',').map((type) => type.trim());
+        courtsFilter.OR = sportTypes.map((type) => ({
+          sportType: { contains: type, mode: 'insensitive' },
+        }));
+      }
+
+      if (minPrice || maxPrice) {
+        courtsFilter.pricePerHour = {
+          ...(minPrice && { gte: minPrice }),
+          ...(maxPrice && { lte: maxPrice }),
+        };
+      }
+
       where.courts = {
-        some: {
-          ...(sportType && { sportType: { contains: sportType, mode: 'insensitive' } }),
-          ...(minPrice && { pricePerHour: { gte: minPrice } }),
-          ...(maxPrice && { pricePerHour: { lte: maxPrice } }),
-        },
+        some: courtsFilter,
       };
     }
 
@@ -116,8 +140,9 @@ export class FacilitiesService {
     ]);
 
     const enrichedFacilities = await this.enrichFacilities(facilities);
+    const sortedFacilities = this.sortEnrichedFacilities(enrichedFacilities, sort);
     const meta = createPaginationMeta(total, page, limit);
-    return { data: enrichedFacilities, meta };
+    return { data: sortedFacilities, meta };
   }
 
   async findOne(id: string, include?: string) {
@@ -183,15 +208,35 @@ export class FacilitiesService {
       delete updateFacilityDto.status;
     }
 
+    const { photoUrls, ...facilityData } = updateFacilityDto;
+
     const updatedFacility = await this.prisma.facility.update({
       where: { id },
-      data: updateFacilityDto as Prisma.FacilityUpdateInput,
+      data: facilityData as Prisma.FacilityUpdateInput,
       include: {
         owner: {
           select: { id: true, name: true, email: true },
         },
       },
     });
+
+    // Update photos if photoUrls provided
+    if (photoUrls !== undefined) {
+      // Delete existing facility photos
+      await this.prisma.photo.deleteMany({
+        where: { facilityId: id },
+      });
+
+      // Create new photos if any provided
+      if (photoUrls.length > 0) {
+        await this.prisma.photo.createMany({
+          data: photoUrls.map((url) => ({
+            url,
+            facilityId: id,
+          })),
+        });
+      }
+    }
 
     return updatedFacility;
   }
@@ -274,20 +319,60 @@ export class FacilitiesService {
   private async enrichFacilities(facilities: any[]) {
     const enriched = await Promise.all(
       facilities.map(async (facility) => {
+        // Get courts data with counts
         const courts = await this.prisma.court.findMany({
           where: { facilityId: facility.id, isActive: true },
-          select: { sportType: true, pricePerHour: true },
+          select: {
+            id: true,
+            name: true,
+            sportType: true,
+            pricePerHour: true,
+            isActive: true,
+          },
+        });
+
+        // Get photos
+        const photos = await this.prisma.photo.findMany({
+          where: { facilityId: facility.id },
+          select: { id: true, url: true, caption: true },
+        });
+
+        // Get review count and average rating
+        const reviewStats = await this.prisma.review.aggregate({
+          where: {
+            facilityId: facility.id,
+            isApproved: true,
+          },
+          _count: { id: true },
+          _avg: { rating: true },
+        });
+
+        // Get booking count
+        const bookingCount = await this.prisma.booking.count({
+          where: { facilityId: facility.id },
         });
 
         const startingPrice = courts.length > 0 ? Math.min(...courts.map((c) => c.pricePerHour)) : null;
-
         const sportTypes = [...new Set(courts.map((c) => c.sportType))];
+
+        // Merge counts from includes or calculate them
+        const courtsCount = facility._count?.courts || courts.length;
+        const reviewsCount = facility._count?.reviews || reviewStats._count.id;
+        const bookingsCount = facility._count?.bookings || bookingCount;
+        const avgRating = facility.avgRating || reviewStats._avg.rating;
 
         return {
           ...facility,
           startingPrice,
           sportTypes,
-          courtsCount: courts.length,
+          courtsCount,
+          reviewsCount,
+          bookingsCount,
+          avgRating,
+          photoUrls: photos.map((p) => p.url),
+          // Add courts and photos if not already included
+          ...(facility.courts ? {} : { courts }),
+          ...(facility.photos ? {} : { photos }),
         };
       }),
     );
@@ -299,6 +384,42 @@ export class FacilitiesService {
     if (!sort) return { createdAt: 'desc' as const };
 
     const [field, direction = 'asc'] = sort.split(',');
-    return { [field]: direction as 'asc' | 'desc' };
+
+    // Handle computed fields that need special sorting logic
+    switch (field) {
+      case 'avgRating':
+        // These will be sorted in memory after enrichment
+        return { createdAt: 'desc' as const };
+      case 'courtsCount':
+        // These will be sorted in memory after enrichment
+        return { createdAt: 'desc' as const };
+      case 'startingPrice':
+        // These will be sorted in memory after enrichment
+        return { createdAt: 'desc' as const };
+      default:
+        return { [field]: direction as 'asc' | 'desc' };
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private sortEnrichedFacilities(facilities: Record<string, any>[], sort?: string): Record<string, any>[] {
+    if (!sort) return facilities;
+
+    const [field, direction = 'asc'] = sort.split(',');
+
+    // Only sort computed fields here, others are handled by database
+    if (['avgRating', 'courtsCount', 'startingPrice'].includes(field)) {
+      return facilities.sort((a, b) => {
+        const aValue = a[field] || 0;
+        const bValue = b[field] || 0;
+
+        if (direction === 'desc') {
+          return bValue - aValue;
+        }
+        return aValue - bValue;
+      });
+    }
+
+    return facilities;
   }
 }

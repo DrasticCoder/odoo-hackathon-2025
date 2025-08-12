@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsBoolean, IsNumber, Min, IsObject, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsNumber, Min, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaginationQueryDto } from '../../common/dto/pagination.dto';
 
@@ -56,7 +56,7 @@ export class UpdateCourtDto {
 export class CourtQueryDto extends PaginationQueryDto {
   @ApiProperty({ description: 'Filter by facility ID', required: false })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   facilityId?: string;
 
   @ApiProperty({ description: 'Filter by sport type', required: false })
@@ -80,6 +80,7 @@ export class CourtQueryDto extends PaginationQueryDto {
 
   @ApiProperty({ description: 'Filter by active status', required: false })
   @IsOptional()
+  @Type(() => Boolean)
   @IsBoolean()
   isActive?: boolean;
 
@@ -178,6 +179,7 @@ export class AvailabilityQueryDto {
 
   @ApiProperty({ description: 'Include blocked slots', required: false })
   @IsOptional()
+  @Type(() => Boolean)
   @IsBoolean()
   includeBlocked?: boolean;
 }

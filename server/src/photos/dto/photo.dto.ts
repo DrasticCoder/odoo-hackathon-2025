@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 
 export class CreatePhotoDto {
   @ApiProperty({ description: 'Photo URL' })
@@ -13,17 +13,17 @@ export class CreatePhotoDto {
 
   @ApiProperty({ description: 'Facility ID (if photo belongs to facility)', required: false })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   facilityId?: string;
 
   @ApiProperty({ description: 'Court ID (if photo belongs to court)', required: false })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   courtId?: string;
 
   @ApiProperty({ description: 'User ID (if photo belongs to user)', required: false })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   userId?: string;
 }
 

@@ -15,6 +15,8 @@ import { HomeModule } from './home/home.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { MailModule } from './mail/mail.module';
 import { LLMModule } from './llm/llm.module';
+import { ReviewsModule } from './reviews/reviews.module';
+import { SearchModule } from './search/search.module';
 import { LokiOptions } from 'pino-loki';
 import { config } from './common/config';
 
@@ -70,6 +72,8 @@ import { config } from './common/config';
     HomeModule,
     MailModule,
     LLMModule,
+    ReviewsModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [

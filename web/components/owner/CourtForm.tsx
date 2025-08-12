@@ -193,7 +193,7 @@ export default function CourtForm({ initialData, facilities, onSubmit, isEdit = 
           </div>
 
           <div>
-            <Label htmlFor='pricePerHour'>Price per Hour ($) *</Label>
+            <Label htmlFor='pricePerHour'>Price per Hour (₹) *</Label>
             <Input
               id='pricePerHour'
               type='number'

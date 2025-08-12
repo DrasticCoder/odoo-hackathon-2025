@@ -19,6 +19,9 @@ import {
   Booking,
   BookingQuery,
   FacilityQuery,
+  Review,
+  ReviewQuery,
+  ReviewStats,
 } from '@/types/owner.types';
 import { PaginatedResponse } from '@/types';
 
@@ -93,8 +96,33 @@ export class OwnerService {
   }
 
   // Court Management APIs
-  static async getCourts(params?: Record<string, any>) {
-    return await ApiClient.get<PaginatedResponse<Court>>('/api/courts', { params });
+  static async getCourts(params?: Record<string, unknown>) {
+    // Transform parameters to match backend expectations
+    const transformedParams: Record<string, unknown> = {};
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        // Skip undefined/null values
+        if (value !== undefined && value !== null && value !== '') {
+          if (key === 'status') {
+            // Convert status filter to isActive boolean
+            if (value === 'active') {
+              transformedParams.isActive = true;
+            } else if (value === 'inactive') {
+              transformedParams.isActive = false;
+            }
+            // Skip if 'all' or other values
+          } else if (key === 'isActive') {
+            // Ensure isActive is always a boolean
+            transformedParams[key] = value === 'true' || value === true;
+          } else {
+            transformedParams[key] = value;
+          }
+        }
+      });
+    }
+
+    return await ApiClient.get<PaginatedResponse<Court>>('/api/courts', { params: transformedParams });
   }
 
   static async getCourt(id: string, include?: string) {
@@ -116,7 +144,7 @@ export class OwnerService {
   }
 
   // Availability Management APIs
-  static async getCourtAvailability(courtId: string, params?: Record<string, any>) {
+  static async getCourtAvailability(courtId: string, params?: Record<string, unknown>) {
     return await ApiClient.get<AvailabilitySlot[]>(`/api/courts/${courtId}/availability`, { params });
   }
 
@@ -132,8 +160,12 @@ export class OwnerService {
     return await ApiClient.delete(`/api/courts/availability/${slotId}`);
   }
 
+  static async deleteAllAvailabilitySlots(courtId: string) {
+    return await ApiClient.delete(`/api/courts/${courtId}/availability`);
+  }
+
   // Photo Management APIs
-  static async getPhotos(params?: Record<string, any>) {
+  static async getPhotos(params?: Record<string, unknown>) {
     return await ApiClient.get<Photo[]>('/api/photos', { params });
   }
 
@@ -172,5 +204,20 @@ export class OwnerService {
 
   static async cancelBooking(id: string, reason?: string) {
     return await ApiClient.post<Booking>(`/api/bookings/${id}/cancel`, { reason });
+  }
+
+  // Review Management APIs
+  static async getReviews(params?: ReviewQuery) {
+    return await ApiClient.get<PaginatedResponse<Review>>('/api/reviews/owner', { params });
+  }
+
+  static async getReview(id: string) {
+    return await ApiClient.get<Review>(`/api/reviews/${id}`, { params: { include: 'user,facility' } });
+  }
+
+  static async getReviewStats(facilityId?: string) {
+    return await ApiClient.get<ReviewStats>('/api/reviews/stats', {
+      params: { facilityId },
+    });
   }
 }

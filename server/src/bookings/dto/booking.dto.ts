@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsEnum, IsDateString, IsUUID } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsDateString } from 'class-validator';
 import { BookingStatus } from 'prisma/client';
 import { PaginationQueryDto } from '../../common/dto/pagination.dto';
 
 export class CreateBookingDto {
   @ApiProperty({ description: 'Court ID' })
-  @IsUUID()
+  @IsString()
   courtId: string;
 
   @ApiProperty({ description: 'Booking start datetime (ISO 8601)' })
@@ -23,7 +23,7 @@ export class CreateBookingDto {
 
   @ApiProperty({ description: 'User ID (optional, will use current user if not provided)', required: false })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   userId?: string;
 }
 
@@ -57,17 +57,17 @@ export class BookingQueryDto extends PaginationQueryDto {
 
   @ApiProperty({ description: 'Filter by user ID', required: false })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   userId?: string;
 
   @ApiProperty({ description: 'Filter by facility ID', required: false })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   facilityId?: string;
 
   @ApiProperty({ description: 'Filter by court ID', required: false })
   @IsOptional()
-  @IsUUID()
+  @IsString()
   courtId?: string;
 
   @ApiProperty({ description: 'Filter by start date (YYYY-MM-DD)', required: false })

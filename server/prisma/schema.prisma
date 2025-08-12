@@ -180,18 +180,23 @@ model Booking {
   @@map("bookings")
 }
 
+// TODO: integration in frontend
 model Review {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   userId     String   @map("user_id") @db.ObjectId
   facilityId String   @map("facility_id") @db.ObjectId
+  bookingId  String?  @map("booking_id") @db.ObjectId
   rating     Int
   comment    String?
+  isApproved Boolean  @default(false) @map("is_approved")
   createdAt  DateTime @default(now()) @map("created_at")
 
   user     User     @relation("UserReviews", fields: [userId], references: [id])
   facility Facility @relation(fields: [facilityId], references: [id])
 
   @@index([facilityId])
+  @@index([userId])
+  @@index([isApproved])
   @@map("reviews")
 }
 
@@ -245,6 +250,7 @@ model AdminAction {
   @@map("admin_actions")
 }
 
+// TODO:
 model Match {
   id           String      @id @default(auto()) @map("_id") @db.ObjectId
   creatorId    String      @map("creator_id") @db.ObjectId

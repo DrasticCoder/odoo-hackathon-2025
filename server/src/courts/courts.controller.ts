@@ -29,15 +29,14 @@ export class CourtsController {
   constructor(private readonly courtsService: CourtsService) {}
 
   @Get()
-  @Public()
   @ApiOperation({ summary: 'Get all courts with filtering' })
   @ApiResponse({
     status: 200,
     description: 'Courts retrieved successfully',
     type: PaginatedResponseDto<CourtResponseDto>,
   })
-  findAll(@Query() query: CourtQueryDto) {
-    return this.courtsService.findAll(query);
+  findAll(@Query() query: CourtQueryDto, @CurrentUser() currentUser?: CurrentUser) {
+    return this.courtsService.findAll(query, currentUser);
   }
 
   @Get(':id')
@@ -136,5 +135,15 @@ export class CourtsController {
   @ApiResponse({ status: 200, description: 'Availability slot deleted successfully' })
   deleteAvailabilitySlot(@Param('slotId') slotId: string, @CurrentUser() currentUser: CurrentUser) {
     return this.courtsService.deleteAvailabilitySlot(slotId, currentUser);
+  }
+
+  @Delete(':courtId/availability')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.OWNER, UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete all availability slots for a court' })
+  @ApiResponse({ status: 200, description: 'All availability slots deleted successfully' })
+  deleteAllAvailabilitySlots(@Param('courtId') courtId: string, @CurrentUser() currentUser: CurrentUser) {
+    return this.courtsService.deleteAllAvailabilitySlots(courtId, currentUser);
   }
 }
