@@ -4,7 +4,7 @@ A modern full-stack template featuring Next.js for frontend and NestJS for backe
 
 ## 🚀 Features
 
-- **Frontend**: Next.js 14 with App Router
+- **Frontend**: Next.js 15 with App Router
 - **Backend**: NestJS with Prisma ORM
 - **UI Components**: shadcn/ui components
 - **Authentication**: JWT-based auth system
